@@ -4,7 +4,7 @@ This is a simple game based on the SFML libraries where you have to catch up wit
 
 Controls:
 
-W, A, S, D - Moving
+W, A, S, D, Arrows - Moving
 
 I - Show task info
 
