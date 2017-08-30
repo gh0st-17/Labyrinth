@@ -1,10 +1,9 @@
 #include <windows.h>
 #include <iostream>
 #include <sstream>
-#include <vector>
-#include "enemy.h"
+#include "enemy.hpp"
+#include "misc.hpp"
 #include "view.h"
-#include "map.h"
 
 using namespace sf;
 using namespace std;
@@ -12,34 +11,11 @@ using namespace std;
 #define windowSize 512
 #define spriteSize 32
 
-void randomMapGenerate(){ //Генерация монеток
-	int randomElementX = 0;
-	int randomElementY = 0;
-	srand(time(0));
-	int countCoins = 44;
-
-	while (countCoins>0){
-		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
-		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-
-		if (TileMap[randomElementY][randomElementX] == '0') {
-			TileMap[randomElementY][randomElementX] = '2';
-			//std::cout << "coordinate of Stone X:" << randomElementX << "\n" << "coordinate of Stone Y:" << randomElementY << "\n\n";
-			countCoins--;
-		}
-	}
-}
-
-vector<Enemy> enemyCreate(Player *p, Map *tileMap){
-	vector<Enemy> enemies;
-	for (int i = 0; i < HEIGHT_MAP; i++)
-	for (int j = 0; j < WIDTH_MAP; j++)
-	{
-		if (TileMap[i][j] == '5') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 1, tileMap));
-		else if (TileMap[i][j] == '6') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 0, tileMap));
-	}
-	return enemies;
-}
+vector<string> split(string str, char delimiter);
+bool checkMap(vector<String> tileMap);
+vector<String> readMapFromFile(String &mapPath);
+vector<Enemy> enemyCreate(Player *p);
+void randomMapGenerate();
 
 int countScore(Player &p, unsigned timeElapsed){
 	if (timeElapsed != 0) return (p.score * (p.enemiesC + 1)) / (timeElapsed * (p.dieCounter + 1));
@@ -83,13 +59,11 @@ int main()
 	wastedSprite.setPosition(0, 0);
 
 	//Карта
-	randomMapGenerate();
-	Map map1(TileMap);
 
 	//Игрок
-	Player p(34, 34, "images/Hero.png", &window, &map1);
+	Player p(34, 34, "images/Hero.png", &window);
 	//Массив врагов
-	vector<Enemy> enemies = enemyCreate(&p, &map1);
+	vector<Enemy> enemies = enemyCreate(&p);
 
 	//Счетчик времени в игре
 	double t0 = std::clock();
@@ -116,13 +90,14 @@ int main()
 		for (int i = 0; i < HEIGHT_MAP; i++)
 		for (int j = 0; j < WIDTH_MAP; j++)
 		{
-			if (map1.getTileMap()[i][j] == '0' || map1.getTileMap()[i][j] == '5' || map1.getTileMap()[i][j] == '6')  s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize)); //если встретили символ 0, то рисуем 2й квадратик
-			else if (map1.getTileMap()[i][j] == '1') s_map.setTextureRect(IntRect(32, 0, spriteSize, spriteSize));//если встретили символ 1, то рисуем 3й квадратик
-			else if (map1.getTileMap()[i][j] == '2') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));//если встретили символ 2, то рисуем 4й квадратик
-			else if (map1.getTileMap()[i][j] == '3') s_map.setTextureRect(IntRect(96, 0, spriteSize, spriteSize));//если встретили символ 3, то рисуем 5й квадратик
-			else if (map1.getTileMap()[i][j] == '4') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));//если встретили символ 4, то рисуем 5й квадратик
+			if (map1[i][j] == '0' || map1[i][j] == '5' || 
+				map1[i][j] == '6')  s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '1') s_map.setTextureRect(IntRect(32, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '2') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '3') s_map.setTextureRect(IntRect(96, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '4') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
 
-			s_map.setPosition(j * spriteSize, i * spriteSize);//по сути раскидывает квадратики, превращая в карту. то есть задает каждому из них позицию. если убрать, то вся карта нарисуется в одном квадрате
+			s_map.setPosition(j * spriteSize, i * spriteSize);
 
 			window.draw(s_map);//рисуем квадратики на экран
 		}
@@ -131,12 +106,12 @@ int main()
 		coordinatePlayerX = p.x;
 		coordinatePlayerY = p.y;
 
-		//////////Управление персонажем и камерой вида
+		//Управление персонажем и камерой вида
 		getPlayerView(p.x + (p.w / 2), p.y + (p.h / 2));
-		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y  - spriteSize * 4);
+		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4);
 		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize);
 		if ((Keyboard::isKeyPressed(Keyboard::Left) || (Keyboard::isKeyPressed(Keyboard::A)))){
-			p.dir = 1; p.speed = 0.125;//dir =1 - направление вверх, speed =0.1 - скорость движения. Заметьте - время мы уже здесь ни на что не умножаем и нигде не используем каждый раз
+			p.dir = 1; p.speed = 0.125;//dir =1 - направление вверх, speed =0.125 - скорость движения.
 			p.sprite.setTextureRect(IntRect(28, 0, p.w, p.h));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Right) || (Keyboard::isKeyPressed(Keyboard::D)))){
@@ -146,7 +121,7 @@ int main()
 		else if ((Keyboard::isKeyPressed(Keyboard::Up) || (Keyboard::isKeyPressed(Keyboard::W)))){
 			p.dir = 3; p.speed = 0.125;//направление вниз, см выше
 		}
-		else if ((Keyboard::isKeyPressed(Keyboard::Down) || (Keyboard::isKeyPressed(Keyboard::S)))) { //если нажата клавиша стрелка влево или англ буква А
+		else if ((Keyboard::isKeyPressed(Keyboard::Down) || (Keyboard::isKeyPressed(Keyboard::S)))) {
 			p.dir = 2; p.speed = 0.125;//направление вверх, см выше
 		}
 
@@ -197,4 +172,61 @@ int main()
 	}
 
 	return 0;
+}
+
+vector<string> split(string str, char delimiter) {
+	vector<string> internal;
+	stringstream ss(str); // Turn the string into a stream.
+	string tok;
+	while (getline(ss, tok, delimiter)) {
+		internal.push_back(tok);
+	}
+	return internal;
+}
+
+bool checkMap(vector<String> tileMap){
+	size_t size = tileMap[0].getSize();
+	for (size_t i = 1; i < tileMap.size(); i++) if (tileMap[i].getSize() != size) return 0;
+	return 1;
+}
+
+vector<String> readMapFromFile(String &mapPath){
+	ifstream ifs(mapPath.toAnsiString());
+	stringstream buffer;
+	buffer << ifs.rdbuf();
+	ifs.close();
+	vector<std::string> init = split(buffer.str(), '\n');
+	vector<String> tileMap;
+	for (size_t i = 0; i < init.size(); i++) tileMap.push_back(String(init[i]));
+	assert(tileMap.size() >= 10 && tileMap[0].getSize() >= 10 && checkMap(tileMap));
+	return tileMap;
+}
+
+vector<Enemy> enemyCreate(Player *p){
+	vector<Enemy> enemies;
+	for (int i = 0; i < HEIGHT_MAP; i++)
+	for (int j = 0; j < WIDTH_MAP; j++)
+	{
+		if (map[i][j] == '5') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 1));
+		else if (map[i][j] == '6') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 0));
+	}
+	return enemies;
+}
+
+void randomMapGenerate(){ //Генерация монеток
+	int randomElementX = 0;
+	int randomElementY = 0;
+	srand(time(0));
+	int countCoins = 44;
+
+	while (countCoins > 0){
+		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
+		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
+
+		if (TileMap[randomElementY][randomElementX] == '0') {
+			TileMap[randomElementY][randomElementX] = '2';
+			//std::cout << "coordinate of Stone X:" << randomElementX << "\n" << "coordinate of Stone Y:" << randomElementY << "\n\n";
+			countCoins--;
+		}
+	}
 }

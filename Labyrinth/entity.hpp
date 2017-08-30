@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////// À¿—— »√–Œ ¿////////////////////////
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include "map.hpp"
 #include <stdio.h>
 #include <random>
 #include <ctime>

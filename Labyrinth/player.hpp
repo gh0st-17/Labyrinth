@@ -1,11 +1,5 @@
 ////////////////////////////////////////////////////КЛАСС ИГРОКА////////////////////////
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <stdio.h>
-#include <random>
-#include <ctime>
-#include "Entity.h"
-
+#include "Entity.hpp"
 
 using namespace sf;
 using namespace std;
@@ -16,12 +10,10 @@ public:
 	int score = 0;
 	unsigned dieCounter, totalMoney, enemies, enemiesC = 0; //направление (direction) движения игрока
 	RenderWindow *ptrWindow;
-	Map *map; //Указатель на карту
 	
-	Player(float X, float Y, String imagePath, RenderWindow *ptrW, Map *_map) : Entity(X, Y, imagePath){  //Конструктор с параметрами(формальными) для класса Player. При создании объекта класса мы будем задавать имя файла, координату Х и У, ширину и высоту
-		map = _map;
+	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Entity(X, Y, imagePath){
 		w = 28; h = 28;//высота и ширина
-		image.loadFromFile(imagePath);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная 	image.loadFromFile("images/hero/png");
+		image.loadFromFile(imagePath);
 		texture.loadFromImage(image);//закидываем наше изображение в текстуру
 		sprite.setTexture(texture);//заливаем спрайт текстурой
 		x = X; y = Y;//координата появления спрайта
@@ -34,12 +26,12 @@ public:
 		for (int i = 0; i < 24; i++)
 		for (int j = 0; j < 24; j++)
 		{
-			if (TileMap[i][j] == '2') totalMoney++;
-			if (TileMap[i][j] == '5' || TileMap[i][j] == '6') enemies++;
+			if (map1[i][j] == '2') totalMoney++;
+			if (map1[i][j] == '5' || map1[i][j] == '6') enemies++;
 		}
 	}
 
-	void update(float time) //функция "оживления" объекта класса. update - обновление. принимает в себя время SFML , вследствие чего работает бесконечно, давая персонажу движение.
+	void update(float time)
 	{
 		switch (dir)//реализуем поведение в зависимости от направления. (каждая цифра соответствует направлению)
 		{
@@ -54,17 +46,17 @@ public:
 		
 		speed = 0;//зануляем скорость, чтобы персонаж остановился.
 		sprite.setPosition(x, y); //выводим спрайт в позицию x y , посередине. бесконечно выводим в этой функции, иначе бы наш спрайт стоял на месте.
-		interactionWithMap();//вызываем функцию, отвечающую за взаимодействие с картой
 		if (!speed ) moving = 1;
 		else moving = 0;
+		interactionWithmap1();
 	}
 
-	void interactionWithMap()//ф-ция взаимодействия с картой
+	void interactionWithmap1()
 	{
 		for (int i = y / 32; i < (y + h) / 32; i++)//проходимся по тайликам, контактирующим с игроком,, то есть по всем квадратикам размера 32*32, которые мы окрашивали в 9 уроке. про условия читайте ниже.
-		for (int j = x / 32; j<(x + w) / 32; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается. (он ведь больше размера 32*32, поэтому может одновременно стоять на нескольких квадратах). А j<(x + w) / 32 - условие ограничения координат по иксу. то есть координата самого правого квадрата, который соприкасается с персонажем. таким образом идем в цикле слева направо по иксу, проходя по от левого квадрата (соприкасающегося с героем), до правого квадрата (соприкасающегося с героем)
+		for (int j = x / 32; j<(x + w) / 32; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается.
 		{
-			if (map->getTileMap()[i][j] == '1')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
+			if (map1[i][j] == '1')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
 			{
 				if (dy>0)//если мы шли вниз,
 				{
@@ -84,8 +76,8 @@ public:
 				}
 			}
 
-			if (map->getTileMap()[i][j] == '2') { //если символ равен 's' (камень)
-				map->getTileMap()[i][j] = '0';//убираем камень, типа взяли бонус.
+			if (map1[i][j] == '2') { //если символ равен 's' (камень)
+				map1[i][j] = '0';//убираем камень, типа взяли бонус.
 				totalMoney--;
 				sb.loadFromFile("sounds/Money.wav");
 				sound.setBuffer(sb);
@@ -94,9 +86,9 @@ public:
 				if (enemies == 0 && totalMoney == 0) done = 1;
 			}
 
-			if (map->getTileMap()[i][j] == '3') if (done) ptrWindow->close();
+			if (map1[i][j] == '3') if (done) ptrWindow->close();
 
-			if (map->getTileMap()[i][j] == '4' && !manual) {
+			if (map1[i][j] == '4' && !manual) {
 				printf("Hello, Player!\nYour mission is kill all enemies and collect all coins before you go to \"EXIT\".\nPress \"I\" for info.\nPress \"ECS\" to EXIT\n");
 				manual = 1;
 			}
