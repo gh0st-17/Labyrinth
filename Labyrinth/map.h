@@ -1,11 +1,13 @@
 #include <SFML\Graphics.hpp>
+#include <fstream>
+#include <cassert>
+
+const int HEIGHT_MAP = 24;//размер карты высота
+const int WIDTH_MAP = 24;//размер карты ширина 
 
 using namespace sf;
 
-const int HEIGHT_MAP = 24;//размер карты высота
-const int WIDTH_MAP = 24;//размер карты ширина
-
-vector<String> map1 = {
+std::vector<String> map1 = {
 	"111111111111111111111111",
 	"100000010000001000010001",
 	"101011010111111011110111",

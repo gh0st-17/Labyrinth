@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <iostream>
 #include <sstream>
-#include "enemy.hpp"
+#include "enemy.h"
 #include "misc.hpp"
 #include "view.h"
 
@@ -59,6 +59,7 @@ int main()
 	wastedSprite.setPosition(0, 0);
 
 	//Карта
+	randomMapGenerate();
 
 	//Игрок
 	Player p(34, 34, "images/Hero.png", &window);
@@ -207,8 +208,8 @@ vector<Enemy> enemyCreate(Player *p){
 	for (int i = 0; i < HEIGHT_MAP; i++)
 	for (int j = 0; j < WIDTH_MAP; j++)
 	{
-		if (map[i][j] == '5') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 1));
-		else if (map[i][j] == '6') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 0));
+		if (map1[i][j] == '5') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 1));
+		else if (map1[i][j] == '6') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 0));
 	}
 	return enemies;
 }
@@ -223,8 +224,8 @@ void randomMapGenerate(){ //Генерация монеток
 		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
 		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
 
-		if (TileMap[randomElementY][randomElementX] == '0') {
-			TileMap[randomElementY][randomElementX] = '2';
+		if (map1[randomElementY][randomElementX] == '0') {
+			map1[randomElementY][randomElementX] = '2';
 			//std::cout << "coordinate of Stone X:" << randomElementX << "\n" << "coordinate of Stone Y:" << randomElementY << "\n\n";
 			countCoins--;
 		}
