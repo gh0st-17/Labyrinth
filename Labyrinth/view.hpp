@@ -1,10 +1,10 @@
-#include <SFML/Graphics.hpp>
+п»ї#include <SFML/Graphics.hpp>
 using namespace sf;
 
-sf::View view;//объявили sfml объект "вид", который и является камерой
+sf::View view;//РѕР±СЉВ¤РІРёР»Рё sfml РѕР±СЉРµРєС‚ "РІРёРґ", РєРѕС‚РѕСЂС‹Р№ Рё В¤РІР»В¤РµС‚СЃВ¤ РєР°РјРµСЂРѕР№
 
-void getPlayerView(float x, float y) { //функция для считывания координат игрока
-	float tempX = x; float tempY = y;//считываем коорд игрока и проверяем их, чтобы убрать края
+void getPlayerView(float x, float y) { //С„СѓРЅРєС†РёВ¤ РґР»В¤ СЃС‡РёС‚С‹РІР°РЅРёВ¤ РєРѕРѕСЂРґРёРЅР°С‚ РёРіСЂРѕРєР°
+	float tempX = x; float tempY = y;//СЃС‡РёС‚С‹РІР°РµРј РєРѕРѕСЂРґ РёРіСЂРѕРєР° Рё РїСЂРѕРІРµСЂВ¤РµРј РёС…, С‡С‚РѕР±С‹ СѓР±СЂР°С‚СЊ РєСЂР°В¤
 
 	if (x < 32 * 4) tempX = 32 * 4;//left
 	if (x > 512 + 32 * 4) tempX = 512 + 32 * 4;//right
