@@ -1,4 +1,4 @@
-#include <windows.h>
+п»ї#include <windows.h>
 #include <iostream>
 #include <sstream>
 #include "entity.hpp"
@@ -23,7 +23,7 @@ int countScore(Player &p, unsigned timeElapsed){
 
 int main()
 {
-	//Окно и шрифты
+	//РћРєРЅРѕ Рё С€СЂРёС„С‚С‹
 	SetConsoleTitleW(L"Game console output | Ghost-17");
 	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17", Style::Titlebar);
 	view.reset(sf::FloatRect(0, 0, windowSize/2, windowSize/2));
@@ -41,29 +41,29 @@ int main()
 	Text wastedText("WASTED", wastedFont, 36);
 	wastedText.setFillColor(Color::Black);
 
-	//float CurrentFrame = 0;//хранит текущий кадр
+	//float CurrentFrame = 0;//С…СЂР°РЅРёС‚ С‚РµРєСѓС‰РёР№ РєР°РґСЂ
 	Clock clock;
 
-	//Спрайт и текстура карты
+	//РЎРїСЂР°Р№С‚ Рё С‚РµРєСЃС‚СѓСЂР° РєР°СЂС‚С‹
 	Texture fieldtexture;
 	fieldtexture.loadFromFile("images/field.png");
 	Sprite s_map;
 	s_map.setTexture(fieldtexture);
 
-	//Спрайт и текстура WASTED
+	//РЎРїСЂР°Р№С‚ Рё С‚РµРєСЃС‚СѓСЂР° WASTED
 	Sprite wastedSprite;
 	Texture wastedTexture;
 	wastedTexture.loadFromFile("images/wasted.png");
 	wastedSprite.setTexture(wastedTexture);
 	wastedSprite.setPosition(0, 0);
 
-	//Карта
+	//РљР°СЂС‚Р°
 	randomMapGenerate();
 
-	//Игрок
+	//РРіСЂРѕРє
 	Player p(34, 34, "images/Hero.png", &window);
 
-	//Массив врагов
+	//РњР°СЃСЃРёРІ РІСЂР°РіРѕРІ
 	vector<Enemy> enemies;
 	for (int i = 0; i < HEIGHT_MAP; i++)
 	for (int j = 0; j < WIDTH_MAP; j++)
@@ -73,11 +73,11 @@ int main()
 	}
 	p.ptrCollidingEnemy = &enemies;
 
-	//Счетчик времени в игре
+	//РЎС‡РµС‚С‡РёРє РІСЂРµРјРµРЅРё РІ РёРіСЂРµ
 	double t0 = std::clock();
 	double t1, timeElapsed;
 
-	float cc = 0; //Ограничитель анимации WASTED
+	float cc = 0; //РћРіСЂР°РЅРёС‡РёС‚РµР»СЊ Р°РЅРёРјР°С†РёРё WASTED
 
 	while (window.isOpen())
 	{
@@ -107,34 +107,34 @@ int main()
 
 			s_map.setPosition(j * spriteSize, i * spriteSize);
 
-			window.draw(s_map);//рисуем квадратики на экран
+			window.draw(s_map);//СЂРёСЃСѓРµРј РєРІР°РґСЂР°С‚РёРєРё РЅР° СЌРєСЂР°РЅ
 		}
 
 		float coordinatePlayerX, coordinatePlayerY = 0;
 		coordinatePlayerX = p.x;
 		coordinatePlayerY = p.y;
 
-		//Управление персонажем и камерой вида
+		//РЈРїСЂР°РІР»РµРЅРёРµ РїРµСЂСЃРѕРЅР°Р¶РµРј Рё РєР°РјРµСЂРѕР№ РІРёРґР°
 		getPlayerView(p.x + (p.w / 2), p.y + (p.h / 2));
 		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4);
 		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize);
 		if ((Keyboard::isKeyPressed(Keyboard::Left) || (Keyboard::isKeyPressed(Keyboard::A)))){
-			p.dir = 1; p.speed = 0.125;//dir =1 - направление вверх, speed =0.125 - скорость движения.
+			p.dir = 1; p.speed = 0.125;//dir =1 - РЅР°РїСЂР°РІР»РµРЅРёРµ РІРІРµСЂС…, speed =0.125 - СЃРєРѕСЂРѕСЃС‚СЊ РґРІРёР¶РµРЅРёСЏ.
 			p.sprite.setTextureRect(IntRect(28, 0, p.w, p.h));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Right) || (Keyboard::isKeyPressed(Keyboard::D)))){
-			p.dir = 0; p.speed = 0.125;//направление вправо, см выше
+			p.dir = 0; p.speed = 0.125;//РЅР°РїСЂР°РІР»РµРЅРёРµ РІРїСЂР°РІРѕ, СЃРј РІС‹С€Рµ
 			p.sprite.setTextureRect(IntRect(0, 0, p.w, p.h));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Up) || (Keyboard::isKeyPressed(Keyboard::W)))){
-			p.dir = 3; p.speed = 0.125;//направление вниз, см выше
+			p.dir = 3; p.speed = 0.125;//РЅР°РїСЂР°РІР»РµРЅРёРµ РІРЅРёР·, СЃРј РІС‹С€Рµ
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Down) || (Keyboard::isKeyPressed(Keyboard::S)))) {
-			p.dir = 2; p.speed = 0.125;//направление вверх, см выше
+			p.dir = 2; p.speed = 0.125;//РЅР°РїСЂР°РІР»РµРЅРёРµ РІРІРµСЂС…, СЃРј РІС‹С€Рµ
 		}
 
 		//Update
-		viewmap(time);//функция скроллинга карты, передаем ей время sfml
+		viewmap(time);//С„СѓРЅРєС†РёСЏ СЃРєСЂРѕР»Р»РёРЅРіР° РєР°СЂС‚С‹, РїРµСЂРµРґР°РµРј РµР№ РІСЂРµРјСЏ sfml
 		p.update(time);
 		for (unsigned i = 0; i < enemies.size(); i++) enemies[i].update(time);
 
@@ -210,7 +210,7 @@ vector<String> readMapFromFile(String &mapPath){
 	return tileMap;
 }
 
-void randomMapGenerate(){ //Генерация монеток
+void randomMapGenerate(){ //Р“РµРЅРµСЂР°С†РёСЏ РјРѕРЅРµС‚РѕРє
 	int randomElementX = 0;
 	int randomElementY = 0;
 	srand(time(0));
