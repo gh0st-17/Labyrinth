@@ -151,13 +151,13 @@ public:
 	RenderWindow *ptrWindow;
 	vector<Enemy> *ptrCollidingEnemy;
 
-	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Entity(X, Y, imagePath) {  //Конструктор с параметрами(формальными) для класса Player. При создании объекта класса мы будем задавать имя файла, координату Х и У, ширину и высоту
+	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Entity(X, Y, imagePath) {
 		w = 28; h = 28;//высота и ширина
-		image.loadFromFile(imagePath);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная 	image.loadFromFile("images/hero/png");
-		texture.loadFromImage(image);//закидываем наше изображение в текстуру
-		sprite.setTexture(texture);//заливаем спрайт текстурой
-		x = X; y = Y;//координата появления спрайта
-		sprite.setTextureRect(IntRect(0, 0, w, h));  //Задаем спрайту один прямоугольник для вывода одного льва, а не кучи львов сразу. IntRect - приведение типов
+		image.loadFromFile(imagePath);
+		texture.loadFromImage(image);
+		sprite.setTexture(texture);
+		x = X; y = Y;
+		sprite.setTextureRect(IntRect(0, 0, w, h));
 		ptrWindow = ptrW;
 		countMoneyEnemies();
 	}
@@ -196,8 +196,8 @@ public:
 
 	void interactionWithMap()//ф-ция взаимодействия с картой
 	{
-		for (int i = y / 32; i < (y + h) / 32; i++)//проходимся по тайликам, контактирующим с игроком,, то есть по всем квадратикам размера 32*32, которые мы окрашивали в 9 уроке. про условия читайте ниже.
-		for (int j = x / 32; j<(x + w) / 32; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается. (он ведь больше размера 32*32, поэтому может одновременно стоять на нескольких квадратах). А j<(x + w) / 32 - условие ограничения координат по иксу. то есть координата самого правого квадрата, который соприкасается с персонажем. таким образом идем в цикле слева направо по иксу, проходя по от левого квадрата (соприкасающегося с героем), до правого квадрата (соприкасающегося с героем)
+		for (int i = y / 32; i < (y + h) / 32; i++)
+		for (int j = x / 32; j<(x + w) / 32; j++)
 		{
 			if (map1[i][j] == '1')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
 			{
