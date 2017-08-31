@@ -1,9 +1,9 @@
 #include <windows.h>
 #include <iostream>
 #include <sstream>
-#include "enemy.h"
+#include "entity.hpp"
 #include "misc.hpp"
-#include "view.h"
+#include "view.hpp"
 
 using namespace sf;
 using namespace std;
@@ -14,7 +14,6 @@ using namespace std;
 vector<string> split(string str, char delimiter);
 bool checkMap(vector<String> tileMap);
 vector<String> readMapFromFile(String &mapPath);
-vector<Enemy> enemyCreate(Player *p);
 void randomMapGenerate();
 
 int countScore(Player &p, unsigned timeElapsed){
@@ -34,13 +33,13 @@ int main()
 	Font wastedFont;
 	wastedFont.loadFromFile("Pricedown.ttf");
 	Text scoreText("", font, 20);
-	scoreText.setColor(Color::Black);
+	scoreText.setFillColor(Color::Black);
 	scoreText.setStyle(Text::Bold);
 	Text infoText("", font, 20);
-	infoText.setColor(Color::Black);
+	infoText.setFillColor(Color::Black);
 	infoText.setStyle(Text::Bold);
 	Text wastedText("WASTED", wastedFont, 36);
-	wastedText.setColor(Color::Black);
+	wastedText.setFillColor(Color::Black);
 
 	//float CurrentFrame = 0;//хранит текущий кадр
 	Clock clock;
@@ -63,8 +62,16 @@ int main()
 
 	//Игрок
 	Player p(34, 34, "images/Hero.png", &window);
+
 	//Массив врагов
-	vector<Enemy> enemies = enemyCreate(&p);
+	vector<Enemy> enemies;
+	for (int i = 0; i < HEIGHT_MAP; i++)
+	for (int j = 0; j < WIDTH_MAP; j++)
+	{
+		if (map1[i][j] == '5') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", 1));
+		else if (map1[i][j] == '6') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", 0));
+	}
+	p.ptrCollidingEnemy = &enemies;
 
 	//Счетчик времени в игре
 	double t0 = std::clock();
@@ -201,17 +208,6 @@ vector<String> readMapFromFile(String &mapPath){
 	for (size_t i = 0; i < init.size(); i++) tileMap.push_back(String(init[i]));
 	assert(tileMap.size() >= 10 && tileMap[0].getSize() >= 10 && checkMap(tileMap));
 	return tileMap;
-}
-
-vector<Enemy> enemyCreate(Player *p){
-	vector<Enemy> enemies;
-	for (int i = 0; i < HEIGHT_MAP; i++)
-	for (int j = 0; j < WIDTH_MAP; j++)
-	{
-		if (map1[i][j] == '5') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 1));
-		else if (map1[i][j] == '6') enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", p, 0));
-	}
-	return enemies;
 }
 
 void randomMapGenerate(){ //Генерация монеток

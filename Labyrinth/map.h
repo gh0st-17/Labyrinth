@@ -1,6 +1,7 @@
 #include <SFML\Graphics.hpp>
 #include <fstream>
 #include <cassert>
+#include <list>
 
 const int HEIGHT_MAP = 24;//размер карты высота
 const int WIDTH_MAP = 24;//размер карты ширина 
