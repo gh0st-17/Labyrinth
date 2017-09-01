@@ -1,10 +1,10 @@
-#include <math.h>
+п»ї#include <math.h>
 #include "player.hpp"
 
 using namespace sf;
 using namespace std;
 
-class Enemy : public Entity { // класс Врага
+class Enemy : public Entity { // РєР»Р°СЃСЃ Р’СЂР°РіР°
 private:
 	void updateSprite(){
 		sprite.setTexture(texture);
@@ -28,10 +28,10 @@ public:
 	{
 		switch (dir)
 		{
-		case 0: dx = speed; dy = 0;   break;//персонаж идет только вправо
-		case 1: dx = -speed; dy = 0;   break;//персонаж идет только влево
-		case 2: dx = 0; dy = speed;   break;//персонаж идет только вниз
-		case 3: dx = 0; dy = -speed;   break;//персонаж идет только вверх
+		case 0: dx = speed; dy = 0;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРїСЂР°РІРѕ
+		case 1: dx = -speed; dy = 0;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІР»РµРІРѕ
+		case 2: dx = 0; dy = speed;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРЅРёР·
+		case 3: dx = 0; dy = -speed;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРІРµСЂС…
 		}
 
 		updateSprite();

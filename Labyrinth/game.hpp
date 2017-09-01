@@ -1,4 +1,4 @@
-#include <windows.h>
+п»ї#include <windows.h>
 #include <iostream>
 #include <sstream>
 #include "enemy.hpp"
@@ -19,8 +19,8 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 void startGame();
 
 
-void startGame(){ //Данные для инициализации игры
-	//Окно и шрифты
+void startGame(){ //Р”Р°РЅРЅС‹Рµ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РёРіСЂС‹
+	//РћРєРЅРѕ Рё С€СЂРёС„С‚С‹
 	SetConsoleTitleW(L"Game console output | Ghost-17");
 	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17", Style::Titlebar);
 	view.reset(sf::FloatRect(0, 0, windowSize / 2, windowSize / 2));
@@ -38,34 +38,34 @@ void startGame(){ //Данные для инициализации игры
 	Text wastedText("WASTED", wastedFont, 36);
 	wastedText.setColor(Color::Black);
 
-	//Звук убийства
+	//Р—РІСѓРє СѓР±РёР№СЃС‚РІР°
 	SoundBuffer sb;
 	Sound sound;
 	sb.loadFromFile("sounds/Death.wav");
 	sound.setBuffer(sb);
 
-	//Спрайт и текстура карты
+	//РЎРїСЂР°Р№С‚ Рё С‚РµРєСЃС‚СѓСЂР° РєР°СЂС‚С‹
 	Texture fieldtexture;
 	fieldtexture.loadFromFile("images/field.png");
 	Sprite s_map;
 	s_map.setTexture(fieldtexture);
 
-	//Спрайт и текстура WASTED
+	//РЎРїСЂР°Р№С‚ Рё С‚РµРєСЃС‚СѓСЂР° WASTED
 	Sprite wastedSprite;
 	Texture wastedTexture;
 	wastedTexture.loadFromFile("images/wasted.png");
 	wastedSprite.setTexture(wastedTexture);
 	wastedSprite.setPosition(0, 0);
 
-	//Карта
+	//РљР°СЂС‚Р°
 	randomMapGenerate();
 
-	//Игрок
+	//РРіСЂРѕРє
 	Player p(34, 34, "images/Hero.png", &window);
 
-	//Массив врагов
+	//РњР°СЃСЃРёРІ РІСЂР°РіРѕРІ
 	vector<Entity*> entities;
-	//Итератор
+	//РС‚РµСЂР°С‚РѕСЂ
 	vector<Entity*>::iterator it = entities.begin();
 	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
 	unsigned id = 0;
@@ -95,17 +95,17 @@ void startGame(){ //Данные для инициализации игры
 	}
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sound &sound, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed){ //Основной цикл игры
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sound &sound, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed){ //РћСЃРЅРѕРІРЅРѕР№ С†РёРєР» РёРіСЂС‹
 	
-	//float CurrentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
+	//float CurrentFrame = 0;//С…СЂР°РЅРёС‚ С‚РµРєСѓС‰РёР№ РєР°РґСЂ(Р”Р»СЏ Р°РЅРёРјР°С†РёРё, РїРѕРєР° РЅРµС‚) )
 	Clock clock;
 	
-	//Счетчик времени в игре
+	//РЎС‡РµС‚С‡РёРє РІСЂРµРјРµРЅРё РІ РёРіСЂРµ
 
 	double t0 = std::clock();
 	double t1;
 
-	float cc = 0; //Ограничитель анимации WASTED
+	float cc = 0; //РћРіСЂР°РЅРёС‡РёС‚РµР»СЊ Р°РЅРёРјР°С†РёРё WASTED
 	
 	while (window.isOpen())
 	{
@@ -148,19 +148,19 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 
 			s_map.setPosition(j * spriteSize, i * spriteSize);
 
-			window.draw(s_map);//рисуем квадратики на экран
+			window.draw(s_map);//СЂРёСЃСѓРµРј РєРІР°РґСЂР°С‚РёРєРё РЅР° СЌРєСЂР°РЅ
 		}
 
 		float coordinatePlayerX, coordinatePlayerY = 0;
 		coordinatePlayerX = p.x;
 		coordinatePlayerY = p.y;
 
-		//Отображение HUD
+		//РћС‚РѕР±СЂР°Р¶РµРЅРёРµ HUD
 		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4);
 		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize);
 
 		//Update
-		viewmap(time);//функция скроллинга карты, передаем ей время sfml
+		viewmap(time);//С„СѓРЅРєС†РёСЏ СЃРєСЂРѕР»Р»РёРЅРіР° РєР°СЂС‚С‹, РїРµСЂРµРґР°РµРј РµР№ РІСЂРµРјСЏ sfml
 		p.update(time);
 		for (unsigned i = 0; i < entities.size(); i++) entities[i]->update(time);
 
@@ -205,7 +205,7 @@ int countScore(Player &p, int timeElapsed){
 	else return 0;
 }
 
-void randomMapGenerate(){ //Генерация монеток
+void randomMapGenerate(){ //Р“РµРЅРµСЂР°С†РёСЏ РјРѕРЅРµС‚РѕРє
 	int randomElementX = 0;
 	int randomElementY = 0;
 	srand(time(0));
