@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <random>
 #include <ctime>
-#include "Entity.hpp"
+#include "bullet.hpp"
 
 
 using namespace sf;
@@ -11,7 +11,11 @@ using namespace std;
 
 class Player : public Entity { // класс Игрока
 private:
-	void moving(){
+	vector<Entity*>::iterator bulletsIt;
+	unsigned bulletDelay = 200;
+
+	void keys(){
+
 		if ((Keyboard::isKeyPressed(Keyboard::Left) || (Keyboard::isKeyPressed(Keyboard::A)))){
 			dir = 1; speed = 0.1275;//dir =1 - направление вверх, speed =0.125 - скорость движения.
 			sprite.setTextureRect(IntRect(28, 0, w, h));
@@ -26,15 +30,27 @@ private:
 		else if ((Keyboard::isKeyPressed(Keyboard::Down) || (Keyboard::isKeyPressed(Keyboard::S)))) {
 			dir = 2; speed = 0.1275;//направление вверх, см выше
 		}
+		if ((Keyboard::isKeyPressed(Keyboard::Space))) {
+			if (bulletDelay == 500){ bullets.push_back(new Bullet(x, y, "images/Bullet.png", dir)); bulletDelay = 0; }
+			else bulletDelay += 20;
+		}
+		else
+		{
+			bulletDelay = 0;
+		}
 	}
 
 public:
-	bool manual = 0, done = 0;
+	vector<Entity*> bullets;
+	float cacheX, cacheY;
+	bool manual = 0, done = 0, moved;
 	int score = 0;
 	unsigned dieCounter, totalMoney, enemies, enemiesC = 0; //направление (direction) движения игрока
 	RenderWindow *ptrWindow;
 
 	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Entity(X, Y, imagePath){  //Конструктор с параметрами(формальными) для класса Player. При создании объекта класса мы будем задавать имя файла, координату Х и У, ширину и высоту
+		TYPE = Entity::player;
+		health = 100;
 		w = 28; h = 28;//высота и ширина
 		image.loadFromFile(imagePath);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная 	image.loadFromFile("images/hero/png");
 		texture.loadFromImage(image);//закидываем наше изображение в текстуру
@@ -71,7 +87,17 @@ public:
 		sprite.setPosition(x, y); //выводим спрайт в позицию x y , посередине. бесконечно выводим в этой функции, иначе бы наш спрайт стоял на месте.
 		interactionWithMap();//вызываем функцию, отвечающую за взаимодействие с картой
 		getPlayerView(x + (w / 2), y + (h / 2));//Камера вида
-		moving();//Управление
+		keys();//Управление
+		if (cacheX == x && cacheY == y) moved = 0;
+		else moved = 1;
+		if (health = 0) { respawn(); health = 100; }
+		for (size_t i = 0; i < bullets.size(); i++){
+			if (bullets[i]->life){
+				bullets[i]->update(time);
+				ptrWindow->draw(bullets[i]->sprite);
+			}
+			else bulletsIt = bullets.erase(bullets.begin() + i);
+		}
 	}
 
 	void interactionWithMap()//ф-ция взаимодействия с картой

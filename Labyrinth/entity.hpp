@@ -11,11 +11,12 @@ using namespace std;
 
 class Entity {
 public:
+	enum {player, enemy, bullet} TYPE;
 	SoundBuffer sb;
 	Sound sound;
-	bool life = 1;
+	bool life = 1, killedByBullet = 0;
 	float x, y, w, h, dx, dy, speed = 0;
-	unsigned dir, id;
+	unsigned health, dir, id;
 	Image image;
 	Texture texture;
 	Sprite sprite;
@@ -31,6 +32,10 @@ public:
 
 	virtual void update(float time){};
 	virtual void interactionWithMap(){};
+
+	bool collide(FloatRect A, FloatRect B){
+		return A.intersects(B);
+	}
 
 	FloatRect getRect(){
 		return FloatRect(x, y, w, h);

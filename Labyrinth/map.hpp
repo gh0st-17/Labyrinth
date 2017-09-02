@@ -1,10 +1,10 @@
-#include <SFML\Graphics.hpp>
+п»ї#include <SFML\Graphics.hpp>
 #include <fstream>
 #include <cassert>
 #include <list>
 
-const int HEIGHT_MAP = 24;//размер карты высота
-const int WIDTH_MAP = 24;//размер карты ширина 
+const int HEIGHT_MAP = 24;//СЂР°Р·РјРµСЂ РєР°СЂС‚С‹ РІС‹СЃРѕС‚Р°
+const int WIDTH_MAP = 24;//СЂР°Р·РјРµСЂ РєР°СЂС‚С‹ С€РёСЂРёРЅР° 
 
 using namespace sf;
 

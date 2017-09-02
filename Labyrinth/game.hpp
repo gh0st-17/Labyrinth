@@ -15,7 +15,7 @@ bool checkMap(vector<String> tileMap);
 vector<String> readMapFromFile(String &mapPath);
 void randomMapGenerate();
 int countScore(Player &p, int timeElapsed);
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sound &sound, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed);
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed);
 void startGame();
 
 
@@ -37,12 +37,6 @@ void startGame(){ //Данные для инициализации игры
 	infoText.setStyle(Text::Bold);
 	Text wastedText("WASTED", wastedFont, 36);
 	wastedText.setColor(Color::Black);
-
-	//Звук убийства
-	SoundBuffer sb;
-	Sound sound;
-	sb.loadFromFile("sounds/Death.wav");
-	sound.setBuffer(sb);
 
 	//Спрайт и текстура карты
 	Texture fieldtexture;
@@ -86,7 +80,7 @@ void startGame(){ //Данные для инициализации игры
 
 	double timeElapsed;
 
-	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, sound, s_map, p, entities, it, timeElapsed);
+	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed);
 
 	if (p.totalMoney == 0) {
 		printf("Your time %.2f seconds. Your score %d\n", timeElapsed, countScore(p, timeElapsed));
@@ -95,8 +89,12 @@ void startGame(){ //Данные для инициализации игры
 	}
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sound &sound, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed){ //Основной цикл игры
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed){ //Основной цикл игры
 	
+	//Звук
+	SoundBuffer sb;
+	Sound sound;
+
 	//float CurrentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
 	Clock clock;
 	
@@ -128,6 +126,9 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 #ifdef Debug
 				printf("id %u is dead\n", entities[i]->id);
 #endif
+				if (entities[i]->killedByBullet) sb.loadFromFile("sounds/Headshot.wav");
+				else sb.loadFromFile("sounds/Death.wav");
+				sound.setBuffer(sb);
 				sound.play();
 				p.enemies--;
 				p.enemiesC++;
@@ -162,6 +163,8 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		//Update
 		viewmap(time);//функция скроллинга карты, передаем ей время sfml
 		p.update(time);
+		p.cacheX = p.x;
+		p.cacheY = p.y;
 		for (unsigned i = 0; i < entities.size(); i++) entities[i]->update(time);
 
 		window.setView(view);
