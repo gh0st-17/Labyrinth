@@ -11,3 +11,5 @@ I - Show task info
 Space - Shooting. Shoot direction = player direction.
 
 ESC - Exit
+
+HEADSHOT!
