@@ -138,7 +138,7 @@ public:
 			if (map1[i][j] == '3') if (done) ptrWindow->close();
 
 			if (map1[i][j] == '4' && !manual) {
-				printf("Hello, Player!\nYour mission is kill all enemies and collect all coins before you go to \"EXIT\".\nPress \"I\" for info.\nPress \"ECS\" to EXIT\n");
+				printf("Hello, Player!\nYour mission is kill all enemies and collect all coins before you go to \"EXIT\".\nPress \"TAB\" for info.\nPress \"R\" for Restart.\nPress \"ECS\" to EXIT\n");
 				manual = 1;
 			}
 		}

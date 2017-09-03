@@ -9,13 +9,15 @@ using namespace std;
 
 #define windowSize 512
 #define spriteSize 32
+//#define Debug
 
 vector<string> split(string str, char delimiter);
 bool checkMap(vector<String> tileMap);
 vector<String> readMapFromFile(String &mapPath);
-void randomMapGenerate();
+unsigned countCoins();
+void randomMapGenerate(unsigned currentCoinsCount);
 int countScore(Player &p, int timeElapsed);
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed);
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed, bool &restart);
 void startGame();
 
 
@@ -23,6 +25,7 @@ void startGame(){ //Данные для инициализации игры
 	//Окно и шрифты
 	SetConsoleTitleW(L"Game console output | Ghost-17");
 	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17", Style::Titlebar);
+	printf("Window handle %u\n", window.getSystemHandle());
 	view.reset(sf::FloatRect(0, 0, windowSize / 2, windowSize / 2));
 	window.setFramerateLimit(60);
 	Font font;
@@ -40,7 +43,7 @@ void startGame(){ //Данные для инициализации игры
 
 	//Спрайт и текстура карты
 	Texture fieldtexture;
-	fieldtexture.loadFromFile("images/field.png");
+	fieldtexture.loadFromFile("levels/level1/map.png");
 	Sprite s_map;
 	s_map.setTexture(fieldtexture);
 
@@ -52,8 +55,10 @@ void startGame(){ //Данные для инициализации игры
 	wastedSprite.setPosition(0, 0);
 
 	//Карта
-	randomMapGenerate();
-
+	randomMapGenerate(countCoins());
+#ifdef Debug
+	printf("Current coins %u\n", countCoins());
+#endif
 	//Игрок
 	Player p(34, 34, "images/Hero.png", &window);
 
@@ -79,17 +84,19 @@ void startGame(){ //Данные для инициализации игры
 	}
 
 	double timeElapsed;
+	bool restart = 0;
 
-	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed);
+	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed, restart);
 
-	if (p.totalMoney == 0) {
+	if (restart) { startGame(); restart = 0; }
+	else if (p.totalMoney == 0) {
 		printf("Your time %.2f seconds. Your score %d\n", timeElapsed, countScore(p, timeElapsed));
 		Sleep(1000);
 		system("pause");
 	}
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed){ //Основной цикл игры
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
 	
 	//Звук
 	SoundBuffer sb;
@@ -108,6 +115,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 	while (window.isOpen())
 	{
 		if (Keyboard::isKeyPressed(Keyboard::Escape)) break;
+		if (Keyboard::isKeyPressed(Keyboard::R)) { restart = 1; window.close(); }
 		float time;
 		if (!p.life) time = 0;// clock.getElapsedTime().asSeconds();
 		else time = clock.getElapsedTime().asMicroseconds();
@@ -197,7 +205,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		scoreText.setString(ss.str());
 		infoText.setString(p.getInfoString());
 		window.draw(scoreText);
-		if (Keyboard::isKeyPressed(Keyboard::I)) window.draw(infoText);
+		if (Keyboard::isKeyPressed(Keyboard::Tab)) window.draw(infoText);
 		window.display();
 	}
 
@@ -208,20 +216,28 @@ int countScore(Player &p, int timeElapsed){
 	else return 0;
 }
 
-void randomMapGenerate(){ //Генерация монеток
+unsigned countCoins(){
+	unsigned temp = 0;
+	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
+	for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
+	if (map1[i][j] == '2') temp++;
+	return temp;
+}
+
+void randomMapGenerate(unsigned currentCoinsCount){ //Генерация монеток
 	int randomElementX = 0;
 	int randomElementY = 0;
 	srand(time(0));
-	int countCoins = 44;
+	unsigned limitCoins = 50 - currentCoinsCount;
 
-	while (countCoins > 0){
+	while (limitCoins > 0){
 		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
 		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
 
 		if (map1[randomElementY][randomElementX] == '0') {
 			map1[randomElementY][randomElementX] = '2';
 			//std::cout << "coordinate of Stone X:" << randomElementX << "\n" << "coordinate of Stone Y:" << randomElementY << "\n\n";
-			countCoins--;
+			limitCoins--;
 		}
 	}
 }
