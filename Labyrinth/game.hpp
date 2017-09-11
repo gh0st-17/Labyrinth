@@ -1,4 +1,4 @@
-п»ї#include <windows.h>
+#include <windows.h>
 #include <iostream>
 #include <sstream>
 #include "enemy.hpp"
@@ -8,7 +8,7 @@ using namespace sf;
 using namespace std;
 
 #define windowSize 512
-#define spriteSize 32
+#define spriteSize 64
 //#define Debug
 
 vector<string> split(string str, char delimiter);
@@ -21,50 +21,48 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 void startGame();
 
 
-void startGame(){ //Р”Р°РЅРЅС‹Рµ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РёРіСЂС‹
-	//РћРєРЅРѕ Рё С€СЂРёС„С‚С‹
+void startGame(){ //Данные для инициализации игры
+	//Окно и шрифты
 	SetConsoleTitleW(L"Game console output | Ghost-17");
 	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17", Style::Titlebar);
 	printf("Window handle %u\n", window.getSystemHandle());
-	view.reset(sf::FloatRect(0, 0, windowSize / 2, windowSize / 2));
+	view.reset(sf::FloatRect(0, 0, windowSize, windowSize));
 	window.setFramerateLimit(60);
 	Font font;
-	font.loadFromFile("Copyright_House.ttf");
+	font.loadFromFile("Fipps-Regular.otf");
 	Font wastedFont;
 	wastedFont.loadFromFile("Pricedown.ttf");
 	Text scoreText("", font, 20);
 	scoreText.setColor(Color::Black);
-	scoreText.setStyle(Text::Bold);
 	Text infoText("", font, 20);
 	infoText.setColor(Color::Black);
-	infoText.setStyle(Text::Bold);
-	Text wastedText("WASTED", wastedFont, 36);
+	Text wastedText("WASTED", wastedFont, 72);
 	wastedText.setColor(Color::Black);
 
-	//РЎРїСЂР°Р№С‚ Рё С‚РµРєСЃС‚СѓСЂР° РєР°СЂС‚С‹
+	//Спрайт и текстура карты
 	Texture fieldtexture;
 	fieldtexture.loadFromFile("levels/level1/map.png");
 	Sprite s_map;
 	s_map.setTexture(fieldtexture);
 
-	//РЎРїСЂР°Р№С‚ Рё С‚РµРєСЃС‚СѓСЂР° WASTED
+	//Спрайт и текстура WASTED
 	Sprite wastedSprite;
 	Texture wastedTexture;
 	wastedTexture.loadFromFile("images/wasted.png");
 	wastedSprite.setTexture(wastedTexture);
 	wastedSprite.setPosition(0, 0);
 
-	//РљР°СЂС‚Р°
+	//Карта
 	randomMapGenerate(countCoins());
 #ifdef Debug
 	printf("Current coins %u\n", countCoins());
 #endif
-	//РРіСЂРѕРє
-	Player p(34, 34, "images/Hero.png", &window);
+	//Игрок
+	Player p(68, 68, "images/Hero.png", &window);
 
-	//РњР°СЃСЃРёРІ РІСЂР°РіРѕРІ
+	//Массив врагов
 	vector<Entity*> entities;
-	//РС‚РµСЂР°С‚РѕСЂ
+	//Итератор
 	vector<Entity*>::iterator it = entities.begin();
 	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
 	unsigned id = 0;
@@ -96,31 +94,33 @@ void startGame(){ //Р”Р°РЅРЅС‹Рµ РґР»СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РёРіСЂС‹
 	}
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed, bool &restart){ //РћСЃРЅРѕРІРЅРѕР№ С†РёРєР» РёРіСЂС‹
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
 	
-	//Р—РІСѓРє
+	//Звук
 	SoundBuffer sb;
 	Sound sound;
 
-	//float CurrentFrame = 0;//С…СЂР°РЅРёС‚ С‚РµРєСѓС‰РёР№ РєР°РґСЂ(Р”Р»СЏ Р°РЅРёРјР°С†РёРё, РїРѕРєР° РЅРµС‚) )
+	//float CurrentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
 	Clock clock;
+	float lastTime = 0;
 	
-	//РЎС‡РµС‚С‡РёРє РІСЂРµРјРµРЅРё РІ РёРіСЂРµ
+	//Счетчик времени в игре
 
 	double t0 = std::clock();
 	double t1;
 
-	float cc = 0; //РћРіСЂР°РЅРёС‡РёС‚РµР»СЊ Р°РЅРёРјР°С†РёРё WASTED
+	float cc = 0; //Ограничитель анимации WASTED
 	
 	while (window.isOpen())
 	{
 		if (Keyboard::isKeyPressed(Keyboard::Escape)) break;
 		if (Keyboard::isKeyPressed(Keyboard::R)) { restart = 1; window.close(); }
 		float time;
-		if (!p.life) time = 0;// clock.getElapsedTime().asSeconds();
-		else time = clock.getElapsedTime().asMicroseconds();
-		clock.restart();
-		time = time / 1000;
+		//if (!p.life) time = 0;// clock.getElapsedTime().asSeconds();
+		//else time = clock.getElapsedTime().asMicroseconds();
+		time = clock.getElapsedTime().asMicroseconds();
+		//clock.restart();
+		time = time / 800;
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -148,28 +148,29 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		for (int i = 0; i < HEIGHT_MAP; i++)
 		for (int j = 0; j < WIDTH_MAP; j++)
 		{
-			if (map1[i][j] == '0' || map1[i][j] == '5' ||
-				map1[i][j] == '6')  s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '1') s_map.setTextureRect(IntRect(32, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '2') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '3') s_map.setTextureRect(IntRect(96, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '4') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
+			if (map1[i][j] == '0' || map1[i][j] == '5' || map1[i][j] == '6') 
+				s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '1') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '2') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '3') s_map.setTextureRect(IntRect(192, 0, spriteSize, spriteSize));
+			else if (map1[i][j] == '4') s_map.setTextureRect(IntRect(256, 0, spriteSize, spriteSize));
 
 			s_map.setPosition(j * spriteSize, i * spriteSize);
 
-			window.draw(s_map);//СЂРёСЃСѓРµРј РєРІР°РґСЂР°С‚РёРєРё РЅР° СЌРєСЂР°РЅ
+			window.draw(s_map);//рисуем квадратики на экран
 		}
 
 		float coordinatePlayerX, coordinatePlayerY = 0;
 		coordinatePlayerX = p.x;
 		coordinatePlayerY = p.y;
 
-		//РћС‚РѕР±СЂР°Р¶РµРЅРёРµ HUD
-		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4);
-		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize);
+		//Отображение HUD
+		getPlayerView(p.x + (p.w / 2), p.y + (p.h / 2));//Камера вида
+		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4 + 12);
+		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize * 2 + 3);
 
 		//Update
-		viewmap(time);//С„СѓРЅРєС†РёСЏ СЃРєСЂРѕР»Р»РёРЅРіР° РєР°СЂС‚С‹, РїРµСЂРµРґР°РµРј РµР№ РІСЂРµРјСЏ sfml
+		viewmap(time);//функция скроллинга карты, передаем ей время sfml
 		p.update(time);
 		p.cacheX = p.x;
 		p.cacheY = p.y;
@@ -193,15 +194,19 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		}
 		if (cc > 150) {
 			view.setRotation(0);
-			view.reset(sf::FloatRect(0, 0, windowSize / 2, windowSize / 2));
+			view.reset(sf::FloatRect(0, 0, windowSize, windowSize));
+
 			p.respawn();
+			entities[p.colId]->speed = 0.085;
 			cc = 0;
 		}
 		viewmap(time);
 		t1 = std::clock();
 		timeElapsed = (double)(t1 - t0) / CLOCKS_PER_SEC;
+		time = clock.getElapsedTime().asSeconds();
+		clock.restart().asSeconds();
 		stringstream ss;
-		ss << p.getScoreString() << "\nTotal Score: " << countScore(p, timeElapsed);
+		ss << "Score: " << countScore(p, timeElapsed) << "\nFPS: " << (unsigned)(1.0f / time);
 		scoreText.setString(ss.str());
 		infoText.setString(p.getInfoString());
 		window.draw(scoreText);
@@ -212,7 +217,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 }
 
 int countScore(Player &p, int timeElapsed){
-	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / ((timeElapsed / p.enemiesC) * (p.dieCounter + 1));
+	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / (((timeElapsed / 1.370) / (p.enemiesC + 1)) * (p.dieCounter + 1));
 	else return 0;
 }
 
@@ -224,7 +229,7 @@ unsigned countCoins(){
 	return temp;
 }
 
-void randomMapGenerate(unsigned currentCoinsCount){ //Р“РµРЅРµСЂР°С†РёСЏ РјРѕРЅРµС‚РѕРє
+void randomMapGenerate(unsigned currentCoinsCount){ //Генерация монеток
 	int randomElementX = 0;
 	int randomElementY = 0;
 	srand(time(0));

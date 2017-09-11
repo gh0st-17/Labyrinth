@@ -1,51 +1,13 @@
-п»ї#include <math.h>
+#include <math.h>
 #include "player.hpp"
 
 using namespace sf;
 using namespace std;
 
-
-
-
-class Enemy : public Entity { // РєР»Р°СЃСЃ Р’СЂР°РіР°
+class Enemy : public Entity { // класс Врага
 private:
 	void updateSprite(){
 		sprite.setTexture(texture);
-	}
-	Player *p;
-public:
-	Enemy(float X, float Y, String imagePath, Player *P, bool horizont) : Entity(X, Y, imagePath){
-		TYPE = Entity::enemy;
-		health = 100;
-		p = P;
-		w = 28; h = 28;
-		image.loadFromFile(imagePath);
-		texture.loadFromImage(image);
-		sprite.setTexture(texture);
-		sprite.setTextureRect(IntRect(0, 0, w, h));
-		if (horizont) { x = X; y = Y + 2; dir = 0; }
-		else { x = X + 2; y = Y; dir = 2; }
-		printf("Enemy created at %f : %f : %d\n", x, y, horizont);
-		speed = 0.085;
-	}
-
-	void update(float time)
-	{
-		switch (dir)
-		{
-		case 0: dx = speed; dy = 0;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРїСЂР°РІРѕ
-		case 1: dx = -speed; dy = 0;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІР»РµРІРѕ
-		case 2: dx = 0; dy = speed;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРЅРёР·
-		case 3: dx = 0; dy = -speed;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРІРµСЂС…
-		}
-
-		updateSprite();
-		if (life) {
-			x += dx*time;
-			y += dy*time;
-		}
-		sprite.setPosition(x, y);
-		interactionWithMap();
 	}
 
 	void death(){
@@ -56,25 +18,27 @@ public:
 		life = 0;
 	}
 
+	Player *p;
+
 	void interactionWithMap(){
-		for (int i = y / 32; i < (y + h) / 32; i++)
-		for (int j = x / 32; j<(x + w) / 32; j++){
+		for (int i = y / 64; i < (y + h) / 64; i++)
+			for (int j = x / 64; j<(x + w) / 64; j++){
 			if (map1[i][j] == '1'){
 				if (dy>0){
-					y = i * 32 - h;
+					y = i * 64 - h;
 					dir = 3;
 				}
 				if (dy<0){
-					y = i * 32 + 32;
+					y = i * 64 + 64;
 					dir = 2;
 				}
 				if (dx>0){
-					x = j * 32 - w;
+					x = j * 64 - w;
 					dir = 1;
-					sprite.setTextureRect(IntRect(28, 0, w, h));
+					sprite.setTextureRect(IntRect(56, 0, w, h));
 				}
 				if (dx < 0){
-					x = j * 32 + 32;
+					x = j * 64 + 64;
 					dir = 0;
 					sprite.setTextureRect(IntRect(0, 0, w, h));
 				}
@@ -94,6 +58,8 @@ public:
 					p->dieCounter++;
 					p->decScore(500);
 					p->life = 0;
+					p->colId = id;
+					speed = 0;
 					printf("You respawned. Don't collide with pendos\n");
 				}
 			}
@@ -104,5 +70,40 @@ public:
 					killedByBullet = 1;
 				}
 			}
+	}
+
+public:
+	Enemy(float X, float Y, String imagePath, Player *P, bool horizont) : Entity(X, Y, imagePath){
+		TYPE = Entity::enemy;
+		health = 100;
+		p = P;
+		w = 28*2; h = 28*2;
+		image.loadFromFile(imagePath);
+		texture.loadFromImage(image);
+		sprite.setTexture(texture);
+		sprite.setTextureRect(IntRect(0, 0, w, h));
+		if (horizont) { x = X; y = Y + 4; dir = 0; }
+		else { x = X + 4; y = Y; dir = 2; }
+		printf("Enemy created at %f : %f : %d\n", x, y, horizont);
+		speed = 0.095;
+	}
+
+	void update(float time)
+	{
+		switch (dir)
+		{
+		case 0: dx = speed; dy = 0;   break;//персонаж идет только вправо
+		case 1: dx = -speed; dy = 0;   break;//персонаж идет только влево
+		case 2: dx = 0; dy = speed;   break;//персонаж идет только вниз
+		case 3: dx = 0; dy = -speed;   break;//персонаж идет только вверх
+		}
+
+		updateSprite();
+		if (life) {
+			x += dx*time;
+			y += dy*time;
+		}
+		sprite.setPosition(x, y);
+		interactionWithMap();
 	}
 };

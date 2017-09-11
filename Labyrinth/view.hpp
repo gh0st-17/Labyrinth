@@ -6,10 +6,10 @@ sf::View view;//объ¤вили sfml объект "вид", который и �
 void getPlayerView(float x, float y) { //функци¤ дл¤ считывани¤ координат игрока
 	float tempX = x; float tempY = y;//считываем коорд игрока и провер¤ем их, чтобы убрать кра¤
 
-	if (x < 32 * 4) tempX = 32 * 4;//left
-	if (x > 512 + 32 * 4) tempX = 512 + 32 * 4;//right
-	if (y < 32 * 4) tempY = 32 * 4;//top
-	if (y > 512 + 32 * 4) tempY = 512 + 32 * 4;//bottom	
+	if (x < 64 * 4) tempX = 64 * 4;//left
+	if (x > 512 + 64 * 12) tempX = 512 + 64 * 12;//right
+	if (y < 64 * 4) tempY = 64 * 4;//top
+	if (y > 512 + 64 * 12) tempY = 512 + 64 * 12;//bottom	
 
 	view.setCenter(tempX, tempY); 
 }

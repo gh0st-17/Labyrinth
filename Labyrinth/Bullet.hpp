@@ -1,4 +1,4 @@
-п»ї#include "entity.hpp"
+#include "entity.hpp"
 
 using namespace sf;
 using namespace std;
@@ -17,27 +17,27 @@ public:
 		switch (dir)
 		{
 		case 0: {
-					sprite.setTextureRect(IntRect(0, 0, 65, 22));
-					w = 65; h = 22;
-					y += (32 - h)/2;
+					sprite.setTextureRect(IntRect(0, 0, 24, 24));
+					w = 24; h = 24;
+					y += (64 - h)/2;
 					break;
 		}
 		case 1: {
-					sprite.setTextureRect(IntRect(66, 0, 65, 22));
-					w = 65; h = 22;
-					y += (32 - h) / 2;
+					sprite.setTextureRect(IntRect(24, 0, 24, 24));
+					w = 24; h = 24;
+					y += (64 - h) / 2;
 					break;
 		}
 		case 2: {
-					sprite.setTextureRect(IntRect(130, 0, 22, 65));
-					w = 22; h = 65;
-					x += (32 - w) / 2;
+					sprite.setTextureRect(IntRect(48, 0, 24, 22));
+					w = 22; h = 24;
+					x += (64 - w) / 2;
 					break;
 		}
 		case 3: {
-					sprite.setTextureRect(IntRect(152, 0, 22, 65));
-					w = 22; h = 65;
-					x += (32 - w) / 2;
+					sprite.setTextureRect(IntRect(70, 0, 24, 22));
+					w = 22; h = 24;
+					x += (64 - w) / 2;
 					break;
 		}
 		}
@@ -47,10 +47,10 @@ public:
 	void update(float time){
 		switch (dir)
 		{
-		case 0: dx = speed; dy = 0;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРїСЂР°РІРѕ
-		case 1: dx = -speed; dy = 0;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІР»РµРІРѕ
-		case 2: dx = 0; dy = speed;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРЅРёР·
-		case 3: dx = 0; dy = -speed;   break;//РїРµСЂСЃРѕРЅР°Р¶ РёРґРµС‚ С‚РѕР»СЊРєРѕ РІРІРµСЂС…
+		case 0: dx = speed; dy = 0;   break;//персонаж идет только вправо
+		case 1: dx = -speed; dy = 0;   break;//персонаж идет только влево
+		case 2: dx = 0; dy = speed;   break;//персонаж идет только вниз
+		case 3: dx = 0; dy = -speed;   break;//персонаж идет только вверх
 		}
 
 		if (life) {
@@ -62,8 +62,8 @@ public:
 	}
 
 	void interactionWithMap(){
-		for (int i = y / 32; i < (y + h) / 32; i++)
-		for (int j = x / 32; j < (x + w) / 32; j++){
+		for (int i = y / 64; i < (y + h) / 64; i++)
+		for (int j = x / 64; j < (x + w) / 64; j++){
 			if (map1[i][j] == '1'){
 				life = 0;
 			}
