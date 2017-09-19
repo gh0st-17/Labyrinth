@@ -4,7 +4,7 @@
 using namespace sf;
 using namespace std;
 
-class Enemy : public Entity { // класс Врага
+class Enemy : public Actor { // класс Врага
 private:
 	void updateSprite(){
 		sprite.setTexture(texture);
@@ -13,82 +13,85 @@ private:
 	void death(){
 		printf("Pendos killed\n");
 		speed = 0;
-		x = -w;
-		y = -h;
+		setX(-getRect().width);
+		setY(-getRect().height);
 		life = 0;
 	}
 
 	Player *p;
 
 	void interactionWithMap(){
-		for (int i = y / 64; i < (y + h) / 64; i++)
-			for (int j = x / 64; j<(x + w) / 64; j++){
-			if (map1[i][j] == '1'){
-				if (dy>0){
-					y = i * 64 - h;
-					dir = 3;
-				}
-				if (dy<0){
-					y = i * 64 + 64;
-					dir = 2;
-				}
-				if (dx>0){
-					x = j * 64 - w;
-					dir = 1;
-					sprite.setTextureRect(IntRect(56, 0, w, h));
-				}
-				if (dx < 0){
-					x = j * 64 + 64;
-					dir = 0;
-					sprite.setTextureRect(IntRect(0, 0, w, h));
+		for (int i = getRect().top / 64; i < (getRect().top + getRect().height) / 64; i++)
+			for (int j = getRect().left / 64; j < (getRect().left + getRect().width) / 64; j++){
+				if (map1[i][j] == '1'){
+					if (dy > 0){
+						setY(i * 64 - getRect().height);
+						dir = 3;
+					}
+					if (dy < 0){
+						setY(i * 64 + 64);
+						dir = 2;
+					}
+					if (dx > 0){
+						setX(j * 64 - getRect().width);
+						dir = 1;
+						sprite.setTextureRect(IntRect(56, 0, getRect().width, getRect().height));
+					}
+					if (dx < 0){
+						setX(j * 64 + 64);
+						dir = 0;
+						sprite.setTextureRect(IntRect(0, 0, getRect().width, getRect().height));
+					}
 				}
 			}
+		if (collide(p->getRect(), getRect()) && p->dir == dir && p->moved){
+			if (dir == 0 && p->getRect().left + getRect().width - 1 < getRect().left) death();
+			if (dir == 1 && p->getRect().left - getRect().width + 1 > getRect().left) death();
+			if (dir == 2 && p->getRect().top + getRect().height - 1 < getRect().top) death();
+			if (dir == 3 && p->getRect().top - getRect().height + 1 > getRect().top) death();
 		}
-			if (collide(p->getRect(), getRect()) && p->dir == dir && p->moved){
-				if (dir == 0 && p->x + w - 1 < x) death();
-				if (dir == 1 && p->x - w + 1 > x) death();
-				if (dir == 2 && p->y + h - 1 < y) death();
-				if (dir == 3 && p->y - h + 1 > y) death();
-			}
-			else if (collide(p->getRect(), getRect())){
-				if (p->life) {
+		else if (collide(p->getRect(), getRect())){
+			if (p->life) {
+				if (p->colId != id){
 					sb.loadFromFile("sounds/Enemy.wav");
 					sound.setBuffer(sb);
 					sound.play();
-					p->dieCounter++;
 					p->decScore(500);
-					p->life = 0;
 					p->colId = id;
-					speed = 0;
 					printf("You respawned. Don't collide with pendos\n");
 				}
+				p->setHealth(p->getHealth() - 1.0f);
+				speed = 0;
 			}
-			for (size_t i = 0; i < p->bullets.size(); i++){
-				if (collide(p->bullets[i]->getRect(), getRect())){ 
-					life = 0; p->bullets[i]->life = 0; 
-					printf("Pendos shooted\n");
-					killedByBullet = 1;
-				}
+		}
+		else if (!collide(p->getRect(), getRect())){
+			speed = 0.126;
+		}
+
+		for (size_t i = 0; i < p->bullets.size(); i++){
+			if (collide(p->bullets[i]->getRect(), getRect())){
+				life = 0; p->bullets[i]->life = 0;
+				printf("Pendos shooted\n");
+				killedByBullet = 1;
 			}
+		}
 	}
 
 public:
-	Enemy(float X, float Y, String imagePath, Player *P, bool horizont) : Entity(X, Y, imagePath){
-		TYPE = Entity::enemy;
-		health = 100;
+	Enemy(float X, float Y, String imagePath, Player *P, bool horizont, unsigned ID) : Actor(X, Y, imagePath){
+		TYPE = Actor::enemy;
+		setHealth(100);
 		p = P;
-		w = 28*2; h = 28*2;
-		image.loadFromFile(imagePath);
-		texture.loadFromImage(image);
-		sprite.setTexture(texture);
-		sprite.setTextureRect(IntRect(0, 0, w, h));
-		if (horizont) { x = X; y = Y + 4; dir = 0; }
-		else { x = X + 4; y = Y; dir = 2; }
-		printf("Enemy created at %f : %f : %d\n", x, y, horizont);
-		speed = 0.095;
+		id = ID;
+		setWidth(56); setHeight(56);
+		sprite.setTextureRect(IntRect(0, 0, getRect().width, getRect().height));
+		if (horizont) { setX(X); setY(Y + 4); dir = 0; }
+		else { setX(X + 4); setY(Y); dir = 2; }
+		printf("Enemy created at %f : %f : %d : %u\n", getRect().left, getRect().top, horizont, ID);
+		speed = 0.126;
 	}
 
-	void update(float time)
+	void update(float &time)
 	{
 		switch (dir)
 		{
@@ -100,10 +103,10 @@ public:
 
 		updateSprite();
 		if (life) {
-			x += dx*time;
-			y += dy*time;
+			setX(getRect().left + dx * time);
+			setY(getRect().top + dy * time);
 		}
-		sprite.setPosition(x, y);
+		sprite.setPosition(getRect().left, getRect().top);
 		interactionWithMap();
 	}
 };

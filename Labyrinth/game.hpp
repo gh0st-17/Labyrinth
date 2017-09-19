@@ -17,7 +17,7 @@ vector<String> readMapFromFile(String &mapPath);
 unsigned countCoins();
 void randomMapGenerate(unsigned currentCoinsCount);
 int countScore(Player &p, int timeElapsed);
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed, bool &restart);
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart);
 void startGame();
 
 
@@ -50,7 +50,6 @@ void startGame(){ //Данные для инициализации игры
 	Texture wastedTexture;
 	wastedTexture.loadFromFile("images/wasted.png");
 	wastedSprite.setTexture(wastedTexture);
-	wastedSprite.setPosition(0, 0);
 
 	//Карта
 	randomMapGenerate(countCoins());
@@ -61,22 +60,20 @@ void startGame(){ //Данные для инициализации игры
 	Player p(68, 68, "images/Hero.png", &window);
 
 	//Массив врагов
-	vector<Entity*> entities;
+	vector<Actor*> entities;
 	//Итератор
-	vector<Entity*>::iterator it = entities.begin();
+	vector<Actor*>::iterator it = entities.begin();
 	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
 	unsigned id = 0;
 	for (int i = 0; i < HEIGHT_MAP; i++)
 	for (int j = 0; j < WIDTH_MAP; j++)
 	{
 		if (map1[i][j] == '5'){
-			entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1));
-			entities[id]->id = id;
+			entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1, id));
 			id++;
 		}
 		else if (map1[i][j] == '6'){
-			entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0));
-			entities[id]->id = id;
+			entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0, id));
 			id++;
 		}
 	}
@@ -94,7 +91,7 @@ void startGame(){ //Данные для инициализации игры
 	}
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Entity*> &entities, vector<Entity*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
 	
 	//Звук
 	SoundBuffer sb;
@@ -161,19 +158,18 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		}
 
 		float coordinatePlayerX, coordinatePlayerY = 0;
-		coordinatePlayerX = p.x;
-		coordinatePlayerY = p.y;
+		coordinatePlayerX = p.getRect().left;
+		coordinatePlayerY = p.getRect().top;
 
 		//Отображение HUD
-		getPlayerView(p.x + (p.w / 2), p.y + (p.h / 2));//Камера вида
+		getPlayerView(p.getRect().left + (p.getRect().width / 2), p.getRect().top + (p.getRect().height / 2));//Камера вида
 		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4 + 12);
 		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize * 2 + 3);
 
 		//Update
 		viewmap(time);//функция скроллинга карты, передаем ей время sfml
-		p.update(time);
-		p.cacheX = p.x;
-		p.cacheY = p.y;
+		p.cacheX = p.getRect().left;
+		p.cacheY = p.getRect().top;
 		for (unsigned i = 0; i < entities.size(); i++) entities[i]->update(time);
 
 		window.setView(view);
@@ -181,13 +177,15 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		//Draw
 		window.draw(s_map);
 		window.draw(p.sprite);
+		p.update(time);
 		for (unsigned i = 0; i < entities.size(); i++) window.draw(entities[i]->sprite);
 		if (!p.life) {
+			wastedSprite.setPosition(view.getCenter().x - windowSize / 2, view.getCenter().y - windowSize / 2);
 			window.draw(wastedSprite);
 			wastedText.setPosition(view.getCenter().x - spriteSize*1.5, view.getCenter().y - spriteSize);
 			window.draw(wastedText);
 			time = 0;
-			view.setCenter(p.x + (p.w / 2), p.y + (p.h / 2));
+			view.setCenter(p.getRect().left + (p.getRect().width / 2), p.getRect().top + (p.getRect().height / 2));
 			view.rotate(0.125);
 			view.zoom(0.990f);
 			cc += 1;
@@ -217,7 +215,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 }
 
 int countScore(Player &p, int timeElapsed){
-	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / (((timeElapsed / 1.370) / (p.enemiesC + 1)) * (p.dieCounter + 1));
+	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / ((timeElapsed / (p.enemiesC + 1)) * (p.dieCounter + 1));
 	else return 0;
 }
 

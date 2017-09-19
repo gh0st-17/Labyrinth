@@ -9,29 +9,29 @@
 using namespace sf;
 using namespace std;
 
-class Player : public Entity { // класс Игрока
+class Player : public Actor { // класс Игрока
 private:
-	vector<Entity*>::iterator bulletsIt;
-	unsigned bulletDelay = 200;
+	vector<Actor*>::iterator bulletsIt;
+	unsigned bulletDelay = 200, colIdDelay = 100;
 
 	void keys(){
 
 		if ((Keyboard::isKeyPressed(Keyboard::Left) || (Keyboard::isKeyPressed(Keyboard::A)))){
-			dir = 1; speed = 0.13;//dir =1 - направление вверх, speed =0.125 - скорость движения.
-			sprite.setTextureRect(IntRect(56, 0, w, h));
+			dir = 1; speed = 0.17;//dir =1 - направление вверх, speed =0.125 - скорость движения.
+			sprite.setTextureRect(IntRect(56, 0, getRect().width, getRect().height));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Right) || (Keyboard::isKeyPressed(Keyboard::D)))){
-			dir = 0; speed = 0.13;//направление вправо, см выше
-			sprite.setTextureRect(IntRect(0, 0, w, h));
+			dir = 0; speed = 0.17;//направление вправо, см выше
+			sprite.setTextureRect(IntRect(0, 0, getRect().width, getRect().height));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Up) || (Keyboard::isKeyPressed(Keyboard::W)))){
-			dir = 3; speed = 0.13;//направление вниз, см выше
+			dir = 3; speed = 0.17;//направление вниз, см выше
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Down) || (Keyboard::isKeyPressed(Keyboard::S)))) {
-			dir = 2; speed = 0.13;//направление вверх, см выше
+			dir = 2; speed = 0.17;//направление вверх, см выше
 		}
 		if ((Keyboard::isKeyPressed(Keyboard::Space))) {
-			if (bulletDelay == 500){ bullets.push_back(new Bullet(x, y, "images/Bullet.png", dir)); bulletDelay = 0; }
+			if (bulletDelay == 500){ bullets.push_back(new Bullet(getRect().left, getRect().top, "images/Bullet.png", dir)); bulletDelay = 0; }
 			else bulletDelay += 20;
 		}
 		else
@@ -51,26 +51,26 @@ private:
 
 	void interactionWithMap()//ф-ция взаимодействия с картой
 	{
-		for (int i = y / 64; i < (y + h) / 64; i++)//проходимся по тайликам, контактирующим с игроком,, то есть по всем квадратикам размера 32*32, которые мы окрашивали в 9 уроке. про условия читайте ниже.
-			for (int j = x / 64; j< (x + w) / 64; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается.
+		for (int i = getRect().top / 64; i < (getRect().top + getRect().height) / 64; i++)//проходимся по тайликам, контактирующим с игроком,, то есть по всем квадратикам размера 32*32, которые мы окрашивали в 9 уроке. про условия читайте ниже.
+			for (int j = getRect().left / 64; j < (getRect().left + getRect().width) / 64; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается.
 		{
 			if (map1[i][j] == '1')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
 			{
 				if (dy>0)//если мы шли вниз,
 				{
-					y = i * 64 - h;//то стопорим координату игрек персонажа. сначала получаем координату нашего квадратика на карте(стены) и затем вычитаем из высоты спрайта персонажа.
+					setY(i * 64 - getRect().height);//то стопорим координату игрек персонажа. сначала получаем координату нашего квадратика на карте(стены) и затем вычитаем из высоты спрайта персонажа.
 				}
 				if (dy<0)
 				{
-					y = i * 64 + 64;//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
+					setY(i * 64 + 64);//аналогично с ходьбой вверх. dy<0, значит мы идем вверх (вспоминаем координаты паинта)
 				}
 				if (dx>0)
 				{
-					x = j * 64 - w;//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
+					setX(j * 64 - getRect().width);//если идем вправо, то координата Х равна стена (символ 0) минус ширина персонажа
 				}
 				if (dx < 0)
 				{
-					x = j * 64 + 64;//аналогично идем влево
+					setX(j * 64 + 64);//аналогично идем влево
 				}
 			}
 
@@ -94,29 +94,25 @@ private:
 	}
 
 public:
-	vector<Entity*> bullets;
+	vector<Actor*> bullets;
 	float cacheX, cacheY;
 	bool manual = 0, done = 0, moved;
 	int score = 0;
 	unsigned colId, dieCounter, totalMoney, enemies, enemiesC = 0;
-	RenderWindow *ptrWindow;
 
-	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Entity(X, Y, imagePath){  //Конструктор с параметрами(формальными) для класса Player. При создании объекта класса мы будем задавать имя файла, координату Х и У, ширину и высоту
-		TYPE = Entity::player;
-		health = 100;
-		w = 28*2; h = 28*2;//высота и ширина
-		image.loadFromFile(imagePath);//запихиваем в image наше изображение вместо File мы передадим то, что пропишем при создании объекта. В нашем случае "hero.png" и получится запись идентичная 	image.loadFromFile("images/hero/png");
-		texture.loadFromImage(image);//закидываем наше изображение в текстуру
-		sprite.setTexture(texture);//заливаем спрайт текстурой
-		x = X; y = Y;//координата появления спрайта
-		sprite.setTextureRect(IntRect(0, 0, w, h));  //Задаем спрайту один прямоугольник для вывода одного льва, а не кучи львов сразу. IntRect - приведение типов
+	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Actor(X, Y, imagePath){  //Конструктор с параметрами(формальными) для класса Player. При создании объекта класса мы будем задавать имя файла, координату Х и У, ширину и высоту
+		TYPE = Actor::player;
+		setHealth(100);
+		setWidth(56); setHeight(56);
+		sprite.setTextureRect(IntRect(0, 0, getRect().width, getRect().height));  //Задаем спрайту один прямоугольник для вывода одного льва, а не кучи львов сразу. IntRect - приведение типов
 		ptrWindow = ptrW;
 		countMoneyEnemies();
 	}
 
 
-	void update(float time) //функция "оживления" объекта класса. update - обновление. принимает в себя время SFML , вследствие чего работает бесконечно, давая персонажу движение.
+	void update(float &time) //функция "оживления" объекта класса. update - обновление. принимает в себя время SFML , вследствие чего работает бесконечно, давая персонажу движение.
 	{
+		//cout << colId << endl;
 		switch (dir)//реализуем поведение в зависимости от направления. (каждая цифра соответствует направлению)
 		{
 		case 0: dx = speed; dy = 0;   break;//по иксу задаем положительную скорость, по игреку зануляем. получаем, что персонаж идет только вправо
@@ -125,16 +121,20 @@ public:
 		case 3: dx = 0; dy = -speed;   break;//по иксу задаем нулевое значение, по игреку отрицательное. получается, что персонаж идет только вверх
 		}
 
-		x += dx*time;//то движение из прошлого урока. наше ускорение на время получаем смещение координат и как следствие движение
-		y += dy*time;//аналогично по игреку
+		setX(getRect().left + dx * time);
+		setY(getRect().top + dy * time);
 
 		speed = 0;//зануляем скорость, чтобы персонаж остановился.
-		sprite.setPosition(x, y); //выводим спрайт в позицию x y , посередине. бесконечно выводим в этой функции, иначе бы наш спрайт стоял на месте.
+		sprite.setPosition(getRect().left, getRect().top); //выводим спрайт в позицию x y , посередине. бесконечно выводим в этой функции, иначе бы наш спрайт стоял на месте.
 		interactionWithMap();//вызываем функцию, отвечающую за взаимодействие с картой
 		if(life) keys();//Управление
-		if (cacheX == x && cacheY == y) moved = 0;
+		if (cacheX == getRect().left && cacheY == getRect().top) moved = 0;
 		else moved = 1;
-		if (health = 0) { respawn(); health = 100; }
+		if (getHealth() == 0) {
+			respawn();
+			dieCounter++;
+			setHealth(100);
+		}
 		for (size_t i = 0; i < bullets.size(); i++){
 			if (bullets[i]->life){
 				bullets[i]->update(time);
@@ -142,12 +142,28 @@ public:
 			}
 			else bulletsIt = bullets.erase(bullets.begin() + i);
 		}
+
+		HealthBar->setPercentage(getHealth());
+		HealthBar->setBarPos(getRect().left, getRect().top);
+		HealthBar->update(time);
+		ptrWindow->draw(HealthBar->sprite);
+		ptrWindow->draw(HealthBar->blackS);
+
+		if (colId){
+			if (colIdDelay){
+				colIdDelay--;
+			}
+			else{
+				colId = 0;
+				colIdDelay = 100;
+			}
+		}
 	}
 
 	void respawn(){
 		life = 1;
-		x = 68;
-		y = 68;
+		setX(68);
+		setY(68);
 	}
 
 	string getScoreString(){
