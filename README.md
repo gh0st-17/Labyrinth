@@ -15,6 +15,9 @@ R - Restart game.
 ESC - Exit.
 
 New:
-+HealthBar\n
+
++HealthBar
+
 +TextureSize
+
 +Minor fixes and improve
