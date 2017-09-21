@@ -18,10 +18,10 @@ Add:
 
 + HealthBar/ShootBar
 
-+ TextureSize
-
 Changes:
 
 - Map
+
+- TextureSize
 
 - Minor fixes and improve
