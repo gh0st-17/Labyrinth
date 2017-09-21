@@ -5,34 +5,43 @@ using namespace std;
 
 class Bar : public Entity{
 private:
+	bool visible = 1;
 	float percentage = 100;
-	RenderWindow *ptrWindow;
 	Texture blackT;
+	Sprite blackS;
+	Sprite overlay;
 
 public:
-	Sprite blackS;
 
-	Bar(float X, float Y, String imagePath, String blackPath, RenderWindow *pWindow) : Entity(X, Y, imagePath){
-		ptrWindow = pWindow;
+	Bar(float X, float Y, String imagePath) : Entity(X, Y, imagePath){
 		setWidth(100); setHeight(14);
-		blackT.loadFromFile(blackPath);
+		blackT.loadFromFile("images/BarBack.png");
 		blackS.setTexture(blackT);
-		sprite.setTextureRect(IntRect(0, 0, 100, 14));
+		overlay.setTexture(blackT);
+		sprite.setTextureRect(IntRect(0, 0, 100, 8));
+		overlay.setTextureRect(IntRect(0, 0, 104, 14));
 	}
 
 	void setBarPos(float X, float Y){
-		sprite.setPosition(X - (100 - 56)/2, Y - 20);
+		overlay.setPosition(X - (100 - 56) / 2, Y - 20);
+		sprite.setPosition(overlay.getPosition().x + 2, overlay.getPosition().y + 3);
 	}
 
-	void update(float &time){
+	void update(float &time, RenderWindow *ptrWindow){
 		if (percentage >= 0){
 			float offset = 100 - percentage;
-			blackS.setTextureRect(IntRect(0, 0, offset, 14));
+			blackS.setTextureRect(IntRect(2, 3, offset, 8));
 			blackS.setPosition(sprite.getPosition().x + (100 - offset), sprite.getPosition().y);
 		}
+		ptrWindow->draw(overlay);
+		ptrWindow->draw(sprite);
+		ptrWindow->draw(blackS);
 	}
 
 	float getPercentage(){ return percentage; }
 	void setPercentage(float p){ percentage = p; }
+	bool getVisible(){ return visible; }
+	void setVisible(bool v){ visible = v; }
+
 
 };

@@ -7,7 +7,7 @@ class Bullet : public Actor {
 public:
 
 	Bullet(float X, float Y, String imagePath, unsigned &direction) : Actor(X, Y, imagePath){
-		printf("Bullet created at %1f %1f\n", getRect().left, getRect().top);
+		printf("%s Bullet created at [%.3f, %.3f]\n", getTime().c_str(), getRect().left, getRect().top);
 		TYPE = Actor::bullet;
 		dir = direction;
 		switch (dir)

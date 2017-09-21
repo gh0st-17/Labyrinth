@@ -1,8 +1,3 @@
-#include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <stdio.h>
-#include <random>
-#include <ctime>
 #include "bullet.hpp"
 
 
@@ -12,8 +7,9 @@ using namespace std;
 class Player : public Actor { // класс Игрока
 private:
 	vector<Actor*>::iterator bulletsIt;
-	unsigned bulletDelay = 200, colIdDelay = 100;
-
+	unsigned bulletDelay = 500, colIdDelay = 100;
+	float * ptrTime;
+	Bar * ShootBar = new Bar(getRect().left, getRect().top, "images/ShootBar.png");
 	void keys(){
 
 		if ((Keyboard::isKeyPressed(Keyboard::Left) || (Keyboard::isKeyPressed(Keyboard::A)))){
@@ -31,7 +27,10 @@ private:
 			dir = 2; speed = 0.17;//направление вверх, см выше
 		}
 		if ((Keyboard::isKeyPressed(Keyboard::Space))) {
-			if (bulletDelay == 500){ bullets.push_back(new Bullet(getRect().left, getRect().top, "images/Bullet.png", dir)); bulletDelay = 0; }
+			if (bulletDelay == 500){ 
+				bullets.push_back(new Bullet(getRect().left, getRect().top, "images/Bullet.png", dir));
+				bulletDelay = 0;
+			}
 			else bulletDelay += 20;
 		}
 		else
@@ -73,22 +72,26 @@ private:
 					setX(j * 64 + 64);//аналогично идем влево
 				}
 			}
-
-			if (map1[i][j] == '2') { //если символ равен 's' (камень)
-				map1[i][j] = '0';//убираем камень, типа взяли бонус.
+			if (map1[i][j] == '2') {
+				map1[i][j] = '0';
 				totalMoney--;
 				sb.loadFromFile("sounds/Money.wav");
 				sound.setBuffer(sb);
 				sound.play();
-				score += 150;
+				score += 200;
 				if (enemies == 0 && totalMoney == 0) done = 1;
 			}
-
 			if (map1[i][j] == '3') if (done) ptrWindow->close();
-
 			if (map1[i][j] == '4' && !manual) {
 				printf("Hello, Player!\nYour mission is kill all enemies and collect all coins before you go to \"EXIT\".\nPress \"TAB\" for info.\nPress \"R\" for Restart.\nPress \"ECS\" to EXIT\n");
 				manual = 1;
+			}
+			if (map1[i][j] == 'h' && getHealth() < 100) {
+				map1[i][j] = '0';
+				sb.loadFromFile("sounds/Healing.wav");
+				sound.setBuffer(sb);
+				sound.play();
+				setHealth(100);
 			}
 		}
 	}
@@ -112,6 +115,7 @@ public:
 
 	void update(float &time) //функция "оживления" объекта класса. update - обновление. принимает в себя время SFML , вследствие чего работает бесконечно, давая персонажу движение.
 	{
+
 		//cout << colId << endl;
 		switch (dir)//реализуем поведение в зависимости от направления. (каждая цифра соответствует направлению)
 		{
@@ -145,9 +149,13 @@ public:
 
 		HealthBar->setPercentage(getHealth());
 		HealthBar->setBarPos(getRect().left, getRect().top);
-		HealthBar->update(time);
-		ptrWindow->draw(HealthBar->sprite);
-		ptrWindow->draw(HealthBar->blackS);
+		HealthBar->update(time, ptrWindow);
+		if ((Keyboard::isKeyPressed(Keyboard::Space)) && bulletDelay != 500) {
+			ShootBar->setPercentage(bulletDelay / 5);
+			ShootBar->setBarPos(getRect().left, getRect().top - 11);
+			ShootBar->update((*ptrTime), ptrWindow);
+		}
+
 
 		if (colId){
 			if (colIdDelay){

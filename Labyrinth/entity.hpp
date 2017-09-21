@@ -2,6 +2,7 @@
 #include <SFML/Audio.hpp>
 #include <random>
 #include <ctime>
+#include "misc.hpp"
 
 using namespace sf;
 using namespace std;

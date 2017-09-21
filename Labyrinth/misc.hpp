@@ -1,7 +1,16 @@
-#include <SFML\Graphics.hpp>
-#include <fstream>
-#include <cassert>
-#include <vector>
+using namespace std;
+
+#pragma warning(disable : 4996)
+string getTime() {										//Получаем полную дату для имени файла
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, sizeof(buffer), "[%H:%M:%S]", timeinfo);
+	string str(buffer);
+	return str;
+}
 
 /*class Map{
 private:

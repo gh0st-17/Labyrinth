@@ -2,7 +2,6 @@
 #include <iostream>
 #include <sstream>
 #include "enemy.hpp"
-#include "misc.hpp"
 
 using namespace sf;
 using namespace std;
@@ -15,7 +14,8 @@ vector<string> split(string str, char delimiter);
 bool checkMap(vector<String> tileMap);
 vector<String> readMapFromFile(String &mapPath);
 unsigned countCoins();
-void randomMapGenerate(unsigned currentCoinsCount);
+unsigned countHearths();
+void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount);
 int countScore(Player &p, int timeElapsed);
 void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart);
 void startGame();
@@ -52,7 +52,7 @@ void startGame(){ //Данные для инициализации игры
 	wastedSprite.setTexture(wastedTexture);
 
 	//Карта
-	randomMapGenerate(countCoins());
+	randomMapGenerate(countCoins(), countHearths());
 #ifdef Debug
 	printf("Current coins %u\n", countCoins());
 #endif
@@ -66,23 +66,22 @@ void startGame(){ //Данные для инициализации игры
 	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
 	unsigned id = 0;
 	for (int i = 0; i < HEIGHT_MAP; i++)
-	for (int j = 0; j < WIDTH_MAP; j++)
-	{
-		if (map1[i][j] == '5'){
-			entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1, id));
-			id++;
+		for (int j = 0; j < WIDTH_MAP; j++)
+		{
+			if (map1[i][j] == '5'){
+				entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1, id));
+				id++;
+			}
+			else if (map1[i][j] == '6'){
+				entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0, id));
+				id++;
+			}
 		}
-		else if (map1[i][j] == '6'){
-			entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0, id));
-			id++;
-		}
-	}
 
 	double timeElapsed;
 	bool restart = 0;
 
 	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed, restart);
-
 	if (restart) { startGame(); restart = 0; }
 	else if (p.totalMoney == 0) {
 		printf("Your time %.2f seconds. Your score %d\n", timeElapsed, countScore(p, timeElapsed));
@@ -92,7 +91,7 @@ void startGame(){ //Данные для инициализации игры
 }
 
 void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
-	
+
 	//Звук
 	SoundBuffer sb;
 	Sound sound;
@@ -100,14 +99,14 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 	//float CurrentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
 	Clock clock;
 	float lastTime = 0;
-	
+
 	//Счетчик времени в игре
 
 	double t0 = std::clock();
 	double t1;
 
 	float cc = 0; //Ограничитель анимации WASTED
-	
+
 	while (window.isOpen())
 	{
 		if (Keyboard::isKeyPressed(Keyboard::Escape)) break;
@@ -143,19 +142,20 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 			}
 		}
 		for (int i = 0; i < HEIGHT_MAP; i++)
-		for (int j = 0; j < WIDTH_MAP; j++)
-		{
-			if (map1[i][j] == '0' || map1[i][j] == '5' || map1[i][j] == '6') 
-				s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '1') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '2') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '3') s_map.setTextureRect(IntRect(192, 0, spriteSize, spriteSize));
-			else if (map1[i][j] == '4') s_map.setTextureRect(IntRect(256, 0, spriteSize, spriteSize));
+			for (int j = 0; j < WIDTH_MAP; j++)
+			{
+				if (map1[i][j] == '0' || map1[i][j] == '5' || map1[i][j] == '6')
+					s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize));
+				else if (map1[i][j] == '1') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
+				else if (map1[i][j] == '2') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
+				else if (map1[i][j] == '3') s_map.setTextureRect(IntRect(192, 0, spriteSize, spriteSize));
+				else if (map1[i][j] == '4') s_map.setTextureRect(IntRect(256, 0, spriteSize, spriteSize));
+				else if (map1[i][j] == 'h') s_map.setTextureRect(IntRect(320, 0, spriteSize, spriteSize));
 
-			s_map.setPosition(j * spriteSize, i * spriteSize);
+				s_map.setPosition(j * spriteSize, i * spriteSize);
 
-			window.draw(s_map);//рисуем квадратики на экран
-		}
+				window.draw(s_map);//рисуем квадратики на экран
+			}
 
 		float coordinatePlayerX, coordinatePlayerY = 0;
 		coordinatePlayerX = p.getRect().left;
@@ -222,16 +222,25 @@ int countScore(Player &p, int timeElapsed){
 unsigned countCoins(){
 	unsigned temp = 0;
 	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
-	for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
-	if (map1[i][j] == '2') temp++;
+		for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
+			if (map1[i][j] == '2') temp++;
 	return temp;
 }
 
-void randomMapGenerate(unsigned currentCoinsCount){ //Генерация монеток
+unsigned countHearths(){
+	unsigned temp = 0;
+	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
+		for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
+			if (map1[i][j] == 'h') temp++;
+	return temp;
+}
+
+void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount){ //Генерация
 	int randomElementX = 0;
 	int randomElementY = 0;
 	srand(time(0));
 	unsigned limitCoins = 50 - currentCoinsCount;
+	unsigned limitHearths = 2 - currentHearthsCount;
 
 	while (limitCoins > 0){
 		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
@@ -239,8 +248,17 @@ void randomMapGenerate(unsigned currentCoinsCount){ //Генерация монеток
 
 		if (map1[randomElementY][randomElementX] == '0') {
 			map1[randomElementY][randomElementX] = '2';
-			//std::cout << "coordinate of Stone X:" << randomElementX << "\n" << "coordinate of Stone Y:" << randomElementY << "\n\n";
 			limitCoins--;
+		}
+	}
+
+	while (limitHearths > 0){
+		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
+		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
+
+		if (map1[randomElementY][randomElementX] == '0') {
+			map1[randomElementY][randomElementX] = 'h';
+			limitHearths--;
 		}
 	}
 }

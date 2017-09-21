@@ -21,7 +21,7 @@ public:
 
 	Actor(float X, float Y, String imagePath) : Entity(X, Y, imagePath){
 		setWidth(28); setHeight(28);
-		HealthBar = new Bar(X, Y - 10, "images/HealthBar.png", "images/HealthBarBlack.png", ptrWindow);
+		HealthBar = new Bar(X, Y, "images/HealthBar.png");
 		setX(X); setY(Y);
 		image.loadFromFile(imagePath);
 		texture.loadFromImage(image);

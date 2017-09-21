@@ -11,7 +11,7 @@ private:
 	}
 
 	void death(){
-		printf("Pendos killed\n");
+		printf("%s Pendos killed\n", getTime().c_str());
 		speed = 0;
 		setX(-getRect().width);
 		setY(-getRect().height);
@@ -58,7 +58,6 @@ private:
 					sound.play();
 					p->decScore(500);
 					p->colId = id;
-					printf("You respawned. Don't collide with pendos\n");
 				}
 				p->setHealth(p->getHealth() - 1.0f);
 				speed = 0;
@@ -71,7 +70,7 @@ private:
 		for (size_t i = 0; i < p->bullets.size(); i++){
 			if (collide(p->bullets[i]->getRect(), getRect())){
 				life = 0; p->bullets[i]->life = 0;
-				printf("Pendos shooted\n");
+				printf("%s Pendos shooted\n", getTime().c_str());
 				killedByBullet = 1;
 			}
 		}
@@ -87,7 +86,7 @@ public:
 		sprite.setTextureRect(IntRect(0, 0, getRect().width, getRect().height));
 		if (horizont) { setX(X); setY(Y + 4); dir = 0; }
 		else { setX(X + 4); setY(Y); dir = 2; }
-		printf("Enemy created at %f : %f : %d : %u\n", getRect().left, getRect().top, horizont, ID);
+		printf("%s Enemy created at [%.3f, %.3f] dir: %d\n", getTime().c_str(), getRect().left, getRect().top, horizont, ID);
 		speed = 0.126;
 	}
 
