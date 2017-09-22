@@ -8,7 +8,7 @@ using namespace std;
 
 class Actor : public Entity{
 private:
-	unsigned health;
+	float health;
 public:
 	enum { player, enemy, bullet } TYPE;
 	SoundBuffer sb;

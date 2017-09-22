@@ -51,16 +51,17 @@ private:
 			if (dir == 3 && p->getRect().top - getRect().height + 1 > getRect().top) death();
 		}
 		else if (collide(p->getRect(), getRect())){
-			if (p->life) {
-				if (p->colId != id){
-					sb.loadFromFile("sounds/Enemy.wav");
-					sound.setBuffer(sb);
-					sound.play();
-					p->decScore(500);
-					p->colId = id;
-				}
-				p->setHealth(p->getHealth() - 1.0f);
+			if (p->getHealth() > 0) {
+				sb.loadFromFile("sounds/Damage.wav");
+				sound.setBuffer(sb);
+				sound.play();
+				p->decScore(1);
+				p->setHealth(p->getHealth() - 0.75f);
 				speed = 0;
+			}
+			else if (p->getHealth() <= 0) {
+				p->dieCounter++;
+				setHealth(100);
 			}
 		}
 		else if (!collide(p->getRect(), getRect())){
@@ -106,6 +107,9 @@ public:
 			setY(getRect().top + dy * time);
 		}
 		sprite.setPosition(getRect().left, getRect().top);
+		/*HealthBar->setPercentage(getHealth());
+		HealthBar->setBarPos(getRect().left, getRect().top);
+		HealthBar->update(time, ptrWindow);*/
 		interactionWithMap();
 	}
 };

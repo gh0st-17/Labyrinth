@@ -7,7 +7,7 @@ using namespace std;
 class Player : public Actor { // класс Игрока
 private:
 	vector<Actor*>::iterator bulletsIt;
-	unsigned bulletDelay = 500, colIdDelay = 100;
+	unsigned bulletDelay = 500;
 	float * ptrTime;
 	Bar * ShootBar = new Bar(getRect().left, getRect().top, "images/ShootBar.png");
 	void keys(){
@@ -50,6 +50,7 @@ private:
 
 	void interactionWithMap()//ф-ция взаимодействия с картой
 	{
+
 		for (int i = getRect().top / 64; i < (getRect().top + getRect().height) / 64; i++)//проходимся по тайликам, контактирующим с игроком,, то есть по всем квадратикам размера 32*32, которые мы окрашивали в 9 уроке. про условия читайте ниже.
 			for (int j = getRect().left / 64; j < (getRect().left + getRect().width) / 64; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается.
 		{
@@ -134,11 +135,7 @@ public:
 		if(life) keys();//Управление
 		if (cacheX == getRect().left && cacheY == getRect().top) moved = 0;
 		else moved = 1;
-		if (getHealth() == 0) {
-			respawn();
-			dieCounter++;
-			setHealth(100);
-		}
+
 		for (size_t i = 0; i < bullets.size(); i++){
 			if (bullets[i]->life){
 				bullets[i]->update(time);
@@ -155,21 +152,11 @@ public:
 			ShootBar->setBarPos(getRect().left, getRect().top - 11);
 			ShootBar->update((*ptrTime), ptrWindow);
 		}
-
-
-		if (colId){
-			if (colIdDelay){
-				colIdDelay--;
-			}
-			else{
-				colId = 0;
-				colIdDelay = 100;
-			}
-		}
 	}
 
 	void respawn(){
 		life = 1;
+		setHealth(100);
 		setX(68);
 		setY(68);
 	}

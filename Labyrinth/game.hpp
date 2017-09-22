@@ -23,6 +23,7 @@ void startGame();
 
 void startGame(){ //Данные для инициализации игры
 	//Окно и шрифты
+	
 	SetConsoleTitleW(L"Game console output | Ghost-17");
 	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17", Style::Titlebar);
 	printf("Window handle %u\n", window.getSystemHandle());
@@ -65,6 +66,7 @@ void startGame(){ //Данные для инициализации игры
 	vector<Actor*>::iterator it = entities.begin();
 	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
 	unsigned id = 0;
+
 	for (int i = 0; i < HEIGHT_MAP; i++)
 		for (int j = 0; j < WIDTH_MAP; j++)
 		{
@@ -141,6 +143,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 				it = entities.erase(entities.begin() + i);
 			}
 		}
+
 		for (int i = 0; i < HEIGHT_MAP; i++)
 			for (int j = 0; j < WIDTH_MAP; j++)
 			{
@@ -171,25 +174,32 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		p.cacheX = p.getRect().left;
 		p.cacheY = p.getRect().top;
 		for (unsigned i = 0; i < entities.size(); i++) entities[i]->update(time);
+		p.update(time);
 
 		window.setView(view);
 
 		//Draw
 		window.draw(s_map);
 		window.draw(p.sprite);
-		p.update(time);
 		for (unsigned i = 0; i < entities.size(); i++) window.draw(entities[i]->sprite);
-		if (!p.life) {
+		if (p.getHealth() <= 0) {
+			time = 0;
+			p.life = 0;
+			if (cc == 0){
+				sb.loadFromFile("sounds/Enemy.wav");
+				sound.setBuffer(sb);
+				sound.play();
+			}
 			wastedSprite.setPosition(view.getCenter().x - windowSize / 2, view.getCenter().y - windowSize / 2);
 			window.draw(wastedSprite);
 			wastedText.setPosition(view.getCenter().x - spriteSize*1.5, view.getCenter().y - spriteSize);
 			window.draw(wastedText);
-			time = 0;
 			view.setCenter(p.getRect().left + (p.getRect().width / 2), p.getRect().top + (p.getRect().height / 2));
 			view.rotate(0.125);
 			view.zoom(0.990f);
 			cc += 1;
 		}
+
 		if (cc > 150) {
 			view.setRotation(0);
 			view.reset(sf::FloatRect(0, 0, windowSize, windowSize));

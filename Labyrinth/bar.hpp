@@ -29,7 +29,7 @@ public:
 
 	void update(float &time, RenderWindow *ptrWindow){
 		if (percentage >= 0){
-			float offset = 100 - percentage;
+			float offset = 100 - (unsigned)percentage;
 			blackS.setTextureRect(IntRect(2, 3, offset, 8));
 			blackS.setPosition(sprite.getPosition().x + (100 - offset), sprite.getPosition().y);
 		}
