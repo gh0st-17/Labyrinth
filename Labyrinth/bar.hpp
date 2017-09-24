@@ -27,17 +27,17 @@ public:
 		sprite.setPosition(overlay.getPosition().x + 2, overlay.getPosition().y + 3);
 	}
 
-	void update(float &time, RenderWindow *ptrWindow){
+	void update(float &time){
 		if (percentage >= 0){
 			float offset = 100 - (unsigned)percentage;
 			blackS.setTextureRect(IntRect(2, 3, offset, 8));
 			blackS.setPosition(sprite.getPosition().x + (100 - offset), sprite.getPosition().y);
 		}
-		ptrWindow->draw(overlay);
-		ptrWindow->draw(sprite);
-		ptrWindow->draw(blackS);
 	}
 
+	Sprite getBlackS(){ return blackS; }
+	Sprite getOverlay(){ return overlay; }
+	Sprite getSprite(){ return sprite; }
 	float getPercentage(){ return percentage; }
 	void setPercentage(float p){ percentage = p; }
 	bool getVisible(){ return visible; }

@@ -9,6 +9,7 @@ using namespace std;
 class Actor : public Entity{
 private:
 	float health;
+
 public:
 	enum { player, enemy, bullet } TYPE;
 	SoundBuffer sb;
@@ -26,6 +27,23 @@ public:
 		image.loadFromFile(imagePath);
 		texture.loadFromImage(image);
 		sprite.setTexture(texture);
+	}
+
+
+	~Actor(){
+		//HealthBar->~Bar();
+		//image.~Image();
+		//texture.~Texture();
+		//sprite.~Sprite();
+	}
+
+	virtual void drawBars(float &time, RenderWindow &window){
+		HealthBar->setPercentage(getHealth());
+		HealthBar->setBarPos(getRect().left, getRect().top);
+		HealthBar->update(time);
+		window.draw(HealthBar->getOverlay());
+		window.draw(HealthBar->getSprite());
+		window.draw(HealthBar->getBlackS());
 	}
 
 	void setHealth(float h){

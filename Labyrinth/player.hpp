@@ -10,24 +10,30 @@ private:
 	unsigned bulletDelay = 500;
 	float * ptrTime;
 	Bar * ShootBar = new Bar(getRect().left, getRect().top, "images/ShootBar.png");
+	void speedChanger(){
+		if ((Keyboard::isKeyPressed(Keyboard::LControl))) speed = 0.126;
+		else speed = 0.17;
+	}
+
 	void keys(){
 
 		if ((Keyboard::isKeyPressed(Keyboard::Left) || (Keyboard::isKeyPressed(Keyboard::A)))){
-			dir = 1; speed = 0.17;//dir =1 - направление вверх, speed =0.125 - скорость движения.
+			dir = 1; speedChanger();//dir =1 - направление вверх, speed =0.125 - скорость движения.
 			sprite.setTextureRect(IntRect(56, 0, getRect().width, getRect().height));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Right) || (Keyboard::isKeyPressed(Keyboard::D)))){
-			dir = 0; speed = 0.17;//направление вправо, см выше
+			dir = 0; speedChanger();//направление вправо, см выше
 			sprite.setTextureRect(IntRect(0, 0, getRect().width, getRect().height));
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Up) || (Keyboard::isKeyPressed(Keyboard::W)))){
-			dir = 3; speed = 0.17;//направление вниз, см выше
+			dir = 3; speedChanger();//направление вниз, см выше
 		}
 		else if ((Keyboard::isKeyPressed(Keyboard::Down) || (Keyboard::isKeyPressed(Keyboard::S)))) {
-			dir = 2; speed = 0.17;//направление вверх, см выше
+			dir = 2; speedChanger();//направление вверх, см выше
 		}
+
 		if ((Keyboard::isKeyPressed(Keyboard::Space))) {
-			if (bulletDelay == 500){ 
+			if (bulletDelay == 500){
 				bullets.push_back(new Bullet(getRect().left, getRect().top, "images/Bullet.png", dir));
 				bulletDelay = 0;
 			}
@@ -97,6 +103,23 @@ private:
 		}
 	}
 
+	void drawBars(float &time){
+		HealthBar->setPercentage(getHealth());
+		HealthBar->setBarPos(getRect().left, getRect().top);
+		HealthBar->update(time);
+		ptrWindow->draw(HealthBar->getOverlay());
+		ptrWindow->draw(HealthBar->getSprite());
+		ptrWindow->draw(HealthBar->getBlackS());
+		if ((Keyboard::isKeyPressed(Keyboard::Space)) && bulletDelay != 500) {
+			ShootBar->setPercentage(bulletDelay / 5);
+			ShootBar->setBarPos(getRect().left, getRect().top - 11);
+			ShootBar->update(time);
+			ptrWindow->draw(ShootBar->getOverlay());
+			ptrWindow->draw(ShootBar->getSprite());
+			ptrWindow->draw(ShootBar->getBlackS());
+		}
+	}
+
 public:
 	vector<Actor*> bullets;
 	float cacheX, cacheY;
@@ -114,10 +137,9 @@ public:
 	}
 
 
+
 	void update(float &time) //функция "оживления" объекта класса. update - обновление. принимает в себя время SFML , вследствие чего работает бесконечно, давая персонажу движение.
 	{
-
-		//cout << colId << endl;
 		switch (dir)//реализуем поведение в зависимости от направления. (каждая цифра соответствует направлению)
 		{
 		case 0: dx = speed; dy = 0;   break;//по иксу задаем положительную скорость, по игреку зануляем. получаем, что персонаж идет только вправо
@@ -144,14 +166,7 @@ public:
 			else bulletsIt = bullets.erase(bullets.begin() + i);
 		}
 
-		HealthBar->setPercentage(getHealth());
-		HealthBar->setBarPos(getRect().left, getRect().top);
-		HealthBar->update(time, ptrWindow);
-		if ((Keyboard::isKeyPressed(Keyboard::Space)) && bulletDelay != 500) {
-			ShootBar->setPercentage(bulletDelay / 5);
-			ShootBar->setBarPos(getRect().left, getRect().top - 11);
-			ShootBar->update((*ptrTime), ptrWindow);
-		}
+		drawBars(time);
 	}
 
 	void respawn(){

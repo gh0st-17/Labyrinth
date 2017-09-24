@@ -6,12 +6,30 @@ using namespace std;
 
 class Enemy : public Actor { // класс Врага
 private:
+	bool killPlayer = 0;
+	unsigned soundLimit = 0;
 	void updateSprite(){
 		sprite.setTexture(texture);
 	}
 
+	void playEDamageSound(){
+		sb.loadFromFile("sounds/EnemyDamage.wav");
+		sound.setBuffer(sb);
+		sound.play();
+	}
+
+	void damage(){
+		setHealth(getHealth() - 1.0f);
+		if (soundLimit == 15){
+			playEDamageSound();
+			soundLimit = 0;
+		}
+		else soundLimit++;
+	}
+
 	void death(){
-		printf("%s Pendos killed\n", getTime().c_str());
+		if(killedByBullet) printf("%s Pendos shooted\n", getTime().c_str());
+		else printf("%s Pendos killed\n", getTime().c_str());
 		speed = 0;
 		setX(-getRect().width);
 		setY(-getRect().height);
@@ -45,10 +63,10 @@ private:
 				}
 			}
 		if (collide(p->getRect(), getRect()) && p->dir == dir && p->moved){
-			if (dir == 0 && p->getRect().left + getRect().width - 1 < getRect().left) death();
-			if (dir == 1 && p->getRect().left - getRect().width + 1 > getRect().left) death();
-			if (dir == 2 && p->getRect().top + getRect().height - 1 < getRect().top) death();
-			if (dir == 3 && p->getRect().top - getRect().height + 1 > getRect().top) death();
+			if (dir == 0 && p->getRect().left + getRect().width - 28 < getRect().left) damage();
+			if (dir == 1 && p->getRect().left - getRect().width + 28 > getRect().left) damage();
+			if (dir == 2 && p->getRect().top + getRect().height - 28 < getRect().top) damage();
+			if (dir == 3 && p->getRect().top - getRect().height + 28 > getRect().top) damage();
 		}
 		else if (collide(p->getRect(), getRect())){
 			if (p->getHealth() > 0) {
@@ -58,10 +76,11 @@ private:
 				p->decScore(1);
 				p->setHealth(p->getHealth() - 0.75f);
 				speed = 0;
+				killPlayer = 0;
 			}
-			else if (p->getHealth() <= 0) {
+			else if (p->getHealth() <= 0 && !killPlayer) {
+				killPlayer = 1;
 				p->dieCounter++;
-				setHealth(100);
 			}
 		}
 		else if (!collide(p->getRect(), getRect())){
@@ -70,9 +89,10 @@ private:
 
 		for (size_t i = 0; i < p->bullets.size(); i++){
 			if (collide(p->bullets[i]->getRect(), getRect())){
-				life = 0; p->bullets[i]->life = 0;
-				printf("%s Pendos shooted\n", getTime().c_str());
-				killedByBullet = 1;
+				playEDamageSound();
+				setHealth(getHealth() - 10.0f);
+				p->bullets[i]->life = 0;
+				if(getHealth() <= 0) killedByBullet = 1;
 			}
 		}
 	}
@@ -107,9 +127,8 @@ public:
 			setY(getRect().top + dy * time);
 		}
 		sprite.setPosition(getRect().left, getRect().top);
-		/*HealthBar->setPercentage(getHealth());
-		HealthBar->setBarPos(getRect().left, getRect().top);
-		HealthBar->update(time, ptrWindow);*/
+
 		interactionWithMap();
+		if (!getHealth()) death();
 	}
 };

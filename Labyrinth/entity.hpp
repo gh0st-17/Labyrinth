@@ -23,6 +23,12 @@ public:
 		sprite.setTextureRect(IntRect(0, 0, w, h));
 	}
 
+	virtual ~Entity(){
+		image.~Image();
+		texture.~Texture();
+		sprite.~Sprite();
+	}
+
 	virtual void update(float &time){};
 	virtual void interactionWithMap(){};
 

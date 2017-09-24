@@ -16,12 +16,12 @@ vector<String> readMapFromFile(String &mapPath);
 unsigned countCoins();
 unsigned countHearths();
 void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount);
-int countScore(Player &p, int timeElapsed);
+int countScore(Player &p, double &timeElapsed);
 void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart);
-void startGame();
+bool startGame(double &timeElapsed, int &score);
 
 
-void startGame(){ //Данные для инициализации игры
+bool startGame(double &timeElapsed, int &score){ //Данные для инициализации игры
 	//Окно и шрифты
 	
 	SetConsoleTitleW(L"Game console output | Ghost-17");
@@ -80,16 +80,13 @@ void startGame(){ //Данные для инициализации игры
 			}
 		}
 
-	double timeElapsed;
 	bool restart = 0;
 
 	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed, restart);
-	if (restart) { startGame(); restart = 0; }
-	else if (p.totalMoney == 0) {
-		printf("Your time %.2f seconds. Your score %d\n", timeElapsed, countScore(p, timeElapsed));
-		Sleep(1000);
-		system("pause");
-	}
+
+	score = countScore(p, timeElapsed);
+
+	return restart;
 }
 
 void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
@@ -98,12 +95,11 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 	SoundBuffer sb;
 	Sound sound;
 
-	//float CurrentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
+	//float currentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
 	Clock clock;
 	float lastTime = 0;
 
 	//Счетчик времени в игре
-
 	double t0 = std::clock();
 	double t1;
 
@@ -111,14 +107,11 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 
 	while (window.isOpen())
 	{
-		if (Keyboard::isKeyPressed(Keyboard::Escape)) break;
+		if (Keyboard::isKeyPressed(Keyboard::Escape))  { restart = 0; window.close(); }
 		if (Keyboard::isKeyPressed(Keyboard::R)) { restart = 1; window.close(); }
 		float time;
-		//if (!p.life) time = 0;// clock.getElapsedTime().asSeconds();
-		//else time = clock.getElapsedTime().asMicroseconds();
-		time = clock.getElapsedTime().asMicroseconds();
-		//clock.restart();
-		time = time / 800;
+		time = clock.getElapsedTime().asSeconds() * 1000;
+		clock.restart().asSeconds();
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -140,6 +133,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 				p.enemiesC++;
 				p.incScore(1000);
 				if (p.enemies == 0 && p.totalMoney == 0) p.done = 1;
+				delete [] entities[i];
 				it = entities.erase(entities.begin() + i);
 			}
 		}
@@ -181,7 +175,10 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		//Draw
 		window.draw(s_map);
 		window.draw(p.sprite);
-		for (unsigned i = 0; i < entities.size(); i++) window.draw(entities[i]->sprite);
+		for (unsigned i = 0; i < entities.size(); i++){
+			window.draw(entities[i]->sprite);
+			entities[i]->drawBars(time, window);
+		}
 		if (p.getHealth() <= 0) {
 			time = 0;
 			p.life = 0;
@@ -211,10 +208,8 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		viewmap(time);
 		t1 = std::clock();
 		timeElapsed = (double)(t1 - t0) / CLOCKS_PER_SEC;
-		time = clock.getElapsedTime().asSeconds();
-		clock.restart().asSeconds();
 		stringstream ss;
-		ss << "Score: " << countScore(p, timeElapsed) << "\nFPS: " << (unsigned)(1.0f / time);
+		ss << "Score: " << countScore(p, timeElapsed) << "\nFPS: " << (unsigned)(1.0f / (time / 1000));
 		scoreText.setString(ss.str());
 		infoText.setString(p.getInfoString());
 		window.draw(scoreText);
@@ -224,8 +219,8 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 
 }
 
-int countScore(Player &p, int timeElapsed){
-	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / ((timeElapsed / (p.enemiesC + 1)) * (p.dieCounter + 1));
+int countScore(Player &p, double &timeElapsed){
+	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / (((unsigned)timeElapsed / (p.enemiesC + 1)) * (p.dieCounter + 1));
 	else return 0;
 }
 
