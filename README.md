@@ -27,3 +27,5 @@ Changelog
 - Output corrections
 
 - Mechanics of killing enemy
+
+- Bar overlay
