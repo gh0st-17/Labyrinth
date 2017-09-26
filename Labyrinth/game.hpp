@@ -18,10 +18,10 @@ unsigned countHearths();
 void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount);
 int countScore(Player &p, double &timeElapsed);
 void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart);
-bool startGame(double &timeElapsed, int &score);
+bool startGame(double &timeElapsed, int &score, bool &restart);
 
 
-bool startGame(double &timeElapsed, int &score){ //Данные для инициализации игры
+bool startGame(double &timeElapsed, int &score, bool &restart){ //Данные для инициализации игры
 	//Окно и шрифты
 	
 	SetConsoleTitleW(L"Game console output | Ghost-17");
@@ -55,10 +55,11 @@ bool startGame(double &timeElapsed, int &score){ //Данные для инициализации игры
 	//Карта
 	randomMapGenerate(countCoins(), countHearths());
 #ifdef Debug
-	printf("Current coins %u\n", countCoins());
+	printf("Current coins %u hearts %u\n", countCoins(), countHearths());
 #endif
 	//Игрок
 	Player p(68, 68, "images/Hero.png", &window);
+	p.totalMoney = countCoins();
 
 	//Массив врагов
 	vector<Actor*> entities;
@@ -79,8 +80,6 @@ bool startGame(double &timeElapsed, int &score){ //Данные для инициализации игры
 				id++;
 			}
 		}
-
-	bool restart = 0;
 
 	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed, restart);
 
@@ -105,13 +104,15 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 
 	float cc = 0; //Ограничитель анимации WASTED
 
+	restart = 0;
+
 	while (window.isOpen())
 	{
 		if (Keyboard::isKeyPressed(Keyboard::Escape))  { restart = 0; window.close(); }
 		if (Keyboard::isKeyPressed(Keyboard::R)) { restart = 1; window.close(); }
 		float time;
-		time = clock.getElapsedTime().asSeconds() * 1000;
-		clock.restart().asSeconds();
+		time = clock.getElapsedTime().asMicroseconds();
+		time = time / 800;
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -208,15 +209,16 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		viewmap(time);
 		t1 = std::clock();
 		timeElapsed = (double)(t1 - t0) / CLOCKS_PER_SEC;
+		time = clock.getElapsedTime().asSeconds();
+		clock.restart().asSeconds();
 		stringstream ss;
-		ss << "Score: " << countScore(p, timeElapsed) << "\nFPS: " << (unsigned)(1.0f / (time / 1000));
+		ss << "Score: " << countScore(p, timeElapsed) << "\nFPS: " << (unsigned)(1.0f / time);
 		scoreText.setString(ss.str());
 		infoText.setString(p.getInfoString());
 		window.draw(scoreText);
 		if (Keyboard::isKeyPressed(Keyboard::Tab)) window.draw(infoText);
 		window.display();
 	}
-
 }
 
 int countScore(Player &p, double &timeElapsed){
@@ -229,6 +231,9 @@ unsigned countCoins(){
 	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
 		for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
 			if (map1[i][j] == '2') temp++;
+#ifdef Debug
+	printf("Current coins %u\n", temp);
+#endif
 	return temp;
 }
 
@@ -237,6 +242,9 @@ unsigned countHearths(){
 	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
 		for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
 			if (map1[i][j] == 'h') temp++;
+#ifdef Debug
+	printf("Current hearts %u\n", temp);
+#endif
 	return temp;
 }
 

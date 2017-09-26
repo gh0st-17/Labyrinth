@@ -46,10 +46,9 @@ private:
 	}
 
 	void countMoneyEnemies(){
-		for (int i = 0; i < 24; i++)
-		for (int j = 0; j < 24; j++)
+		for (int i = 1; i < 23; i++)
+		for (int j = 1; j < 23; j++)
 		{
-			if (map1[i][j] == '2') totalMoney++;
 			if (map1[i][j] == '5' || map1[i][j] == '6') enemies++;
 		}
 	}
@@ -125,7 +124,7 @@ public:
 	float cacheX, cacheY;
 	bool manual = 0, done = 0, moved;
 	int score = 0;
-	unsigned colId, dieCounter, totalMoney, enemies, enemiesC = 0;
+	unsigned colId, dieCounter = 0, totalMoney = 0, enemies = 0, enemiesC = 0;
 
 	Player(float X, float Y, String imagePath, RenderWindow *ptrW) : Actor(X, Y, imagePath){  //Конструктор с параметрами(формальными) для класса Player. При создании объекта класса мы будем задавать имя файла, координату Х и У, ширину и высоту
 		TYPE = Actor::player;

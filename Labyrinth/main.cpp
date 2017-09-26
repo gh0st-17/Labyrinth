@@ -4,8 +4,9 @@ int main()
 {
 	double timeElapsed = 0;
 	int score;
-	while (startGame(timeElapsed, score)) {
-		startGame(timeElapsed, score);
+	bool restart = 1;
+	while (restart) {
+		startGame(timeElapsed, score, restart);
 	}
 	printf("Your time %.3f seconds. Your score %d\n", timeElapsed, score);
 	system("pause");
