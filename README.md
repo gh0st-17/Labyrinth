@@ -1,5 +1,7 @@
 Labyrinth - v1.3.2
 
+Please remove the previous version
+
 This is a simple game based on the SFML libraries where you have to catch up with the enemy in order to kill him and collect coins.
 
 Controls:
