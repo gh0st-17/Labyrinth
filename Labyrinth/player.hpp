@@ -49,7 +49,7 @@ private:
 		for (int i = 1; i < 23; i++)
 		for (int j = 1; j < 23; j++)
 		{
-			if (map1[i][j] == '5' || map1[i][j] == '6') enemies++;
+			if (mapC[i][j] == '5' || mapC[i][j] == '6') enemies++;
 		}
 	}
 
@@ -59,7 +59,7 @@ private:
 		for (int i = getRect().top / 64; i < (getRect().top + getRect().height) / 64; i++)//проходимся по тайликам, контактирующим с игроком,, то есть по всем квадратикам размера 32*32, которые мы окрашивали в 9 уроке. про условия читайте ниже.
 			for (int j = getRect().left / 64; j < (getRect().left + getRect().width) / 64; j++)//икс делим на 32, тем самым получаем левый квадратик, с которым персонаж соприкасается.
 		{
-			if (map1[i][j] == '1')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
+			if (mapC[i][j] == '1')//если наш квадратик соответствует символу 0 (стена), то проверяем "направление скорости" персонажа:
 			{
 				if (dy>0)//если мы шли вниз,
 				{
@@ -78,8 +78,8 @@ private:
 					setX(j * 64 + 64);//аналогично идем влево
 				}
 			}
-			if (map1[i][j] == '2') {
-				map1[i][j] = '0';
+			if (mapC[i][j] == '2') {
+				mapC[i][j] = '0';
 				totalMoney--;
 				sb.loadFromFile("sounds/Money.wav");
 				sound.setBuffer(sb);
@@ -87,13 +87,15 @@ private:
 				score += 200;
 				if (enemies == 0 && totalMoney == 0) done = 1;
 			}
-			if (map1[i][j] == '3') if (done) ptrWindow->close();
-			if (map1[i][j] == '4' && !manual) {
+			if (mapC[i][j] == '3' && done) {
+				nextLvl = 1;
+			}
+			if (mapC[i][j] == '4' && !manual) {
 				printf("Hello, Player!\nYour mission is kill all enemies and collect all coins before you go to \"EXIT\".\nPress \"TAB\" for info.\nPress \"R\" for Restart.\nPress \"ECS\" to EXIT\n");
 				manual = 1;
 			}
-			if (map1[i][j] == 'h' && getHealth() < 100) {
-				map1[i][j] = '0';
+			if (mapC[i][j] == 'h' && getHealth() < 100) {
+				mapC[i][j] = '0';
 				sb.loadFromFile("sounds/Healing.wav");
 				sound.setBuffer(sb);
 				sound.play();
@@ -120,9 +122,9 @@ private:
 	}
 
 public:
-	vector<Actor*> bullets;
+	std::vector<Actor*> bullets;
 	float cacheX, cacheY;
-	bool manual = 0, done = 0, moved;
+	bool manual = 0, done = 0, nextLvl = 0, moved;
 	int score = 0;
 	unsigned colId, dieCounter = 0, totalMoney = 0, enemies = 0, enemiesC = 0;
 
@@ -157,11 +159,12 @@ public:
 		if (cacheX == getRect().left && cacheY == getRect().top) moved = 0;
 		else moved = 1;
 
+		
 		for (size_t i = 0; i < bullets.size(); i++){
 			if (bullets[i]->life){
 				bullets[i]->update(time);
 				ptrWindow->draw(bullets[i]->sprite);
-			}
+			} // Deleting "dead" bullets
 			else bulletsIt = bullets.erase(bullets.begin() + i);
 		}
 

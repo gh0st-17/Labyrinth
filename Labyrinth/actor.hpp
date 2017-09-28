@@ -1,4 +1,5 @@
 #include "view.hpp"
+#include "mapProcessor.hpp"
 #include "map.hpp"
 #include "bar.hpp"
 #include <stdio.h>

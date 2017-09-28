@@ -10,22 +10,14 @@ using namespace std;
 #define spriteSize 64
 //#define Debug
 
-vector<string> split(string str, char delimiter);
-bool checkMap(vector<String> tileMap);
-vector<String> readMapFromFile(String &mapPath);
-unsigned countCoins();
-unsigned countHearths();
-void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount);
 int countScore(Player &p, double &timeElapsed);
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart);
-bool startGame(double &timeElapsed, int &score, bool &restart);
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, std::vector<Actor*> &entities, std::vector<Actor*>::iterator &it, double &timeElapsed, int &restart);
+int startGame(double &timeElapsed, int &score, int &restart);
 
-
-bool startGame(double &timeElapsed, int &score, bool &restart){ //Данные для инициализации игры
+int startGame(double &timeElapsed, int &score, int &restart){ //Данные для инициализации игры
 	//Окно и шрифты
-	
-	SetConsoleTitleW(L"Game console output | Ghost-17");
-	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17", Style::Titlebar);
+	SetConsoleTitleW(L"Game console output | Ghost-17 | 1.4 BETA");
+	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17 | 1.4 BETA", Style::Titlebar);
 	printf("Window handle %u\n", window.getSystemHandle());
 	view.reset(sf::FloatRect(0, 0, windowSize, windowSize));
 	window.setFramerateLimit(60);
@@ -53,29 +45,31 @@ bool startGame(double &timeElapsed, int &score, bool &restart){ //Данные для ини
 	wastedSprite.setTexture(wastedTexture);
 
 	//Карта
-	randomMapGenerate(countCoins(), countHearths());
-#ifdef Debug
-	printf("Current coins %u hearts %u\n", countCoins(), countHearths());
-#endif
+	/*for (int i = 0; i < 24; i++){
+		for (int j = 0; j < 24; j++) printf("%c", mapC[i][j] );
+		printf("\n");
+	}
+	system("pause");*/
+
 	//Игрок
 	Player p(68, 68, "images/Hero.png", &window);
-	p.totalMoney = countCoins();
+	p.totalMoney = 50; // Temporary it's a const value
 
 	//Массив врагов
-	vector<Actor*> entities;
+	std::vector<Actor*> entities;
 	//Итератор
-	vector<Actor*>::iterator it = entities.begin();
+	std::vector<Actor*>::iterator it = entities.begin();
 	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
 	unsigned id = 0;
 
 	for (int i = 0; i < HEIGHT_MAP; i++)
 		for (int j = 0; j < WIDTH_MAP; j++)
 		{
-			if (map1[i][j] == '5'){
+			if (mapC[i][j] == '5'){
 				entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1, id));
 				id++;
 			}
-			else if (map1[i][j] == '6'){
+			else if (mapC[i][j] == '6'){
 				entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0, id));
 				id++;
 			}
@@ -88,13 +82,14 @@ bool startGame(double &timeElapsed, int &score, bool &restart){ //Данные для ини
 	return restart;
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, vector<Actor*> &entities, vector<Actor*>::iterator &it, double &timeElapsed, bool &restart){ //Основной цикл игры
+void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, std::vector<Actor*> &entities, std::vector<Actor*>::iterator &it, double &timeElapsed, int &restart){ //Основной цикл игры
 
 	//Звук
 	SoundBuffer sb;
 	Sound sound;
 
 	//float currentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
+	float time;
 	Clock clock;
 	float lastTime = 0;
 
@@ -105,12 +100,13 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 	float cc = 0; //Ограничитель анимации WASTED
 
 	restart = 0;
+	p.nextLvl = 0;
 
 	while (window.isOpen())
 	{
 		if (Keyboard::isKeyPressed(Keyboard::Escape))  { restart = 0; window.close(); }
 		if (Keyboard::isKeyPressed(Keyboard::R)) { restart = 1; window.close(); }
-		float time;
+		if (p.nextLvl) { restart = 2; window.close(); }
 		time = clock.getElapsedTime().asMicroseconds();
 		time = time / 800;
 		sf::Event event;
@@ -142,13 +138,13 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		for (int i = 0; i < HEIGHT_MAP; i++)
 			for (int j = 0; j < WIDTH_MAP; j++)
 			{
-				if (map1[i][j] == '0' || map1[i][j] == '5' || map1[i][j] == '6')
+				if (mapC[i][j] == '0' || mapC[i][j] == '5' || mapC[i][j] == '6')
 					s_map.setTextureRect(IntRect(0, 0, spriteSize, spriteSize));
-				else if (map1[i][j] == '1') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
-				else if (map1[i][j] == '2') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
-				else if (map1[i][j] == '3') s_map.setTextureRect(IntRect(192, 0, spriteSize, spriteSize));
-				else if (map1[i][j] == '4') s_map.setTextureRect(IntRect(256, 0, spriteSize, spriteSize));
-				else if (map1[i][j] == 'h') s_map.setTextureRect(IntRect(320, 0, spriteSize, spriteSize));
+				else if (mapC[i][j] == '1') s_map.setTextureRect(IntRect(64, 0, spriteSize, spriteSize));
+				else if (mapC[i][j] == '2') s_map.setTextureRect(IntRect(128, 0, spriteSize, spriteSize));
+				else if (mapC[i][j] == '3') s_map.setTextureRect(IntRect(192, 0, spriteSize, spriteSize));
+				else if (mapC[i][j] == '4') s_map.setTextureRect(IntRect(256, 0, spriteSize, spriteSize));
+				else if (mapC[i][j] == 'h') s_map.setTextureRect(IntRect(320, 0, spriteSize, spriteSize));
 
 				s_map.setPosition(j * spriteSize, i * spriteSize);
 
@@ -174,7 +170,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		window.setView(view);
 
 		//Draw
-		window.draw(s_map);
+		//window.draw(s_map);
 		window.draw(p.sprite);
 		for (unsigned i = 0; i < entities.size(); i++){
 			window.draw(entities[i]->sprite);
@@ -224,82 +220,4 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 int countScore(Player &p, double &timeElapsed){
 	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / (((unsigned)timeElapsed / (p.enemiesC + 1)) * (p.dieCounter + 1));
 	else return 0;
-}
-
-unsigned countCoins(){
-	unsigned temp = 0;
-	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
-		for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
-			if (map1[i][j] == '2') temp++;
-#ifdef Debug
-	printf("Current coins %u\n", temp);
-#endif
-	return temp;
-}
-
-unsigned countHearths(){
-	unsigned temp = 0;
-	for (unsigned i = 1; i < WIDTH_MAP - 1; i++)
-		for (unsigned j = 1; j < HEIGHT_MAP - 1; j++)
-			if (map1[i][j] == 'h') temp++;
-#ifdef Debug
-	printf("Current hearts %u\n", temp);
-#endif
-	return temp;
-}
-
-void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount){ //Генерация
-	int randomElementX = 0;
-	int randomElementY = 0;
-	srand(time(0));
-	unsigned limitCoins = 50 - currentCoinsCount;
-	unsigned limitHearths = 2 - currentHearthsCount;
-
-	while (limitCoins > 0){
-		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
-		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-
-		if (map1[randomElementY][randomElementX] == '0') {
-			map1[randomElementY][randomElementX] = '2';
-			limitCoins--;
-		}
-	}
-
-	while (limitHearths > 0){
-		randomElementX = 1 + rand() % (WIDTH_MAP - 1);
-		randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-
-		if (map1[randomElementY][randomElementX] == '0') {
-			map1[randomElementY][randomElementX] = 'h';
-			limitHearths--;
-		}
-	}
-}
-
-vector<string> split(string str, char delimiter) {
-	vector<string> internal;
-	stringstream ss(str); // Turn the string into a stream.
-	string tok;
-	while (getline(ss, tok, delimiter)) {
-		internal.push_back(tok);
-	}
-	return internal;
-}
-
-bool checkMap(vector<String> tileMap){
-	size_t size = tileMap[0].getSize();
-	for (size_t i = 1; i < tileMap.size(); i++) if (tileMap[i].getSize() != size) return 0;
-	return 1;
-}
-
-vector<String> readMapFromFile(String &mapPath){
-	ifstream ifs(mapPath.toAnsiString());
-	stringstream buffer;
-	buffer << ifs.rdbuf();
-	ifs.close();
-	vector<std::string> init = split(buffer.str(), '\n');
-	vector<String> tileMap;
-	for (size_t i = 0; i < init.size(); i++) tileMap.push_back(String(init[i]));
-	assert(tileMap.size() >= 10 && tileMap[0].getSize() >= 10 && checkMap(tileMap));
-	return tileMap;
 }

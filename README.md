@@ -1,5 +1,4 @@
-Labyrinth - v1.3.2
-
+Labyrinth - v1.4.0 - BETA
 Please remove the previous version
 
 This is a simple game based on the SFML libraries where you have to catch up with the enemy in order to kill him and collect coins.
@@ -18,7 +17,13 @@ R - Restart game.
 
 ESC - Exit.
 
-Changelog
+Changelog v1.4.0 - BETA
+
+- Added map change
+
+- Possible crashing 
+
+Changelog v1.3.2
 
 - Enemies have HealthBar too
 

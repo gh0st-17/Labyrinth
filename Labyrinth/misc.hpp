@@ -15,10 +15,10 @@ string getTime() {										//Получаем полную дату для имени файла
 /*class Map{
 private:
 	unsigned H, W;
-	vector<String> TileMap;
+	std::vector<String> TileMap;
 
-	vector<string> split(string str, char delimiter) {
-		vector<string> internal;
+	std::vector<string> split(string str, char delimiter) {
+		std::vector<string> internal;
 		stringstream ss(str); // Turn the string into a stream.
 		string tok;
 		while (getline(ss, tok, delimiter)) {
@@ -27,13 +27,13 @@ private:
 		return internal;
 	}
 
-	bool checkTileMap(vector<String> tileMap){
+	bool checkTileMap(std::vector<String> tileMap){
 		size_t size = tileMap[0].getSize();
 		for (size_t i = 1; i < tileMap.size(); i++) if (tileMap[i].getSize() != size) return 0;
 		return 1;
 	}
 public:
-	Map(vector<String> tileMap){
+	Map(std::vector<String> tileMap){
 		assert(tileMap.size() >= 10 && tileMap[0].getSize() >= 10 && checkTileMap(tileMap));
 		TileMap = tileMap;
 		H = TileMap.size();
@@ -45,8 +45,8 @@ public:
 		stringstream buffer;
 		buffer << ifs.rdbuf();
 		ifs.close();
-		vector<std::string> init = split(buffer.str(), '\n');
-		vector<String> tileMap;
+		std::vector<std::string> init = split(buffer.str(), '\n');
+		std::vector<String> tileMap;
 		for (size_t i = 0; i < init.size(); i++) tileMap.push_back(String(init[i]));
 		assert(tileMap.size() >= 10 && tileMap[0].getSize() >= 10 && checkTileMap(tileMap));
 		TileMap = tileMap;
@@ -54,5 +54,35 @@ public:
 		W = TileMap[0].getSize();
 	}
 
-	vector<String> getTileMap() { return TileMap; }
+	std::vector<String> getTileMap() { return TileMap; }
 };*/
+
+/*
+std::vector<string> split(string str, char delimiter) {
+std::vector<string> internal;
+stringstream ss(str); // Turn the string into a stream.
+string tok;
+while (getline(ss, tok, delimiter)) {
+internal.push_back(tok);
+}
+return internal;
+}
+
+bool checkMap(std::vector<String> tileMap){
+size_t size = tileMap[0].getSize();
+for (size_t i = 1; i < tileMap.size(); i++) if (tileMap[i].getSize() != size) return 0;
+return 1;
+}
+
+std::vector<String> readMapFromFile(String &mapPath){
+ifstream ifs(mapPath.toAnsiString());
+stringstream buffer;
+buffer << ifs.rdbuf();
+ifs.close();
+std::vector<std::string> init = split(buffer.str(), '\n');
+std::vector<String> tileMap;
+for (size_t i = 0; i < init.size(); i++) tileMap.push_back(String(init[i]));
+assert(tileMap.size() >= 10 && tileMap[0].getSize() >= 10 && checkMap(tileMap));
+return tileMap;
+}
+*/

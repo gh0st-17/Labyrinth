@@ -60,7 +60,7 @@ public:
 	void interactionWithMap(){
 		for (int i = getRect().top / 64; i < (getRect().top + getRect().height) / 64; i++)
 			for (int j = getRect().left / 64; j < (getRect().left + getRect().width) / 64; j++){
-			if (map1[i][j] == '1'){
+				if (mapC[i][j] == '1'){
 				life = 0;
 			}
 		}
