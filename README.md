@@ -1,4 +1,4 @@
-Labyrinth - v1.4.0 - BETA
+Labyrinth - v1.4.0
 
 Please remove the previous version
 
@@ -31,6 +31,10 @@ Changelog v1.4.0
 - Display the number of attempts
 
 - Some bugfixes
+
+Known bugs
+
+- Sometimes there may be no sound. Restart the game.
 
 Changelog v1.4.0 - BETA
 
