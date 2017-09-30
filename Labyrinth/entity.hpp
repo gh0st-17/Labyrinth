@@ -34,7 +34,8 @@ public:
 
 	bool collide(FloatRect &A, FloatRect &B){ return A.intersects(B); }
 
-	FloatRect getRect(){ return FloatRect(x, y, w, h); }
+	FloatRect getFloatRect(){ return FloatRect(x, y, w, h); }
+	//IntRect get IntRect(){ return IntRect(x, y, w, h); }
 	//Sprite getSprite(){ return sprite; }
 
 	//void setImage(Image &i){ image = i; }

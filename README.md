@@ -18,6 +18,20 @@ R - Restart game.
 
 ESC - Exit.
 
+Changelog v1.4.0
+
+- Improved map change
+
+- Optimized memory consumption during restart
+
+- Code optimization
+
+- The player now has only 3 attempts
+
+- Display the number of attempts
+
+- Some bugfixes
+
 Changelog v1.4.0 - BETA
 
 - Added map change

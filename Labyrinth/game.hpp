@@ -11,13 +11,63 @@ using namespace std;
 //#define Debug
 
 int countScore(Player &p, double &timeElapsed);
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, std::vector<Actor*> &entities, std::vector<Actor*>::iterator &it, double &timeElapsed, int &restart);
-int startGame(double &timeElapsed, int &score, int &restart);
+void createEnemy(vector<Enemy> &enemies, Player &p);
+string buildPath(unsigned lvl, unsigned map);
+vector <sf::String> readMap(string path);
+void mapChanger();
+void startGame(double &timeElapsed, int &score);
+void restartGame(Player &p, vector<Enemy> &enemies);
+void mainCycle(RenderWindow &window,
+	Text &scoreText,
+	Text &infoText,
+	Text &wastedText,
+	Sprite &wastedSprite,
+	Sprite &s_map,
+	Player &p,
+	vector<Enemy> &entities,
+	vector<Enemy>::iterator &it,
+	double &timeElapsed);
 
-int startGame(double &timeElapsed, int &score, int &restart){ //Данные для инициализации игры
+
+void printLvlInfo(unsigned &lvl, unsigned &map, double &timeElapsed, int score){
+	printf("LVL: %u MAP: %u. Your time %.3f seconds. Your score %d\n", lvl, map, timeElapsed, score);
+	Sleep(350);
+}
+
+void createEnemy(vector<Enemy> &enemies, Player &p){
+	unsigned id = 0;
+	for (int i = 0; i < HEIGHT_MAP; i++)
+		for (int j = 0; j < WIDTH_MAP; j++)
+		{
+			if (mapC[i][j] == '5'){
+				enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1, id));
+				id++;
+			}
+			else if (mapC[i][j] == '6'){
+				enemies.push_back(Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0, id));
+				id++;
+			}
+		}
+}
+
+void mapChanger(int action){
+	if (action == 1){
+		mapNum++;
+		if (mapNum > 2) mapNum = 1;
+	}
+	vector <sf::String> temp = readMap(buildPath(lvl, mapNum));
+	MapProcessor().proceedMap(temp);
+	mapC = temp;
+#ifdef Debug
+	printf("mapNum = %d\n", mapNum);
+#endif
+}
+
+//Данные для инициализации игры
+void startGame(double &timeElapsed, int &score){
 	//Окно и шрифты
-	SetConsoleTitleW(L"Game console output | Ghost-17 | 1.4 BETA");
-	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17 | 1.4 BETA", Style::Titlebar);
+	SetConsoleTitleW(L"Game console output | Ghost-17 | 1.4.0");
+	RenderWindow window(sf::VideoMode(windowSize, windowSize), "Labyrinth | Ghost-17 | 1.4.0", Style::Titlebar);
 	printf("Window handle %u\n", window.getSystemHandle());
 	view.reset(sf::FloatRect(0, 0, windowSize, windowSize));
 	window.setFramerateLimit(60);
@@ -45,50 +95,76 @@ int startGame(double &timeElapsed, int &score, int &restart){ //Данные для иници
 	wastedSprite.setTexture(wastedTexture);
 
 	//Карта
-	/*for (int i = 0; i < 24; i++){
-		for (int j = 0; j < 24; j++) printf("%c", mapC[i][j] );
-		printf("\n");
-	}
-	system("pause");*/
+	mapChanger(0);
 
 	//Игрок
 	Player p(68, 68, "images/Hero.png", &window);
-	p.totalMoney = 50; // Temporary it's a const value
+	p.totalMoney = MapProcessor().getCoinsLimit();
 
 	//Массив врагов
-	std::vector<Actor*> entities;
+	vector<Enemy> enemies;
 	//Итератор
-	std::vector<Actor*>::iterator it = entities.begin();
-	//entities.push_back(new Player(34, 34, "images/Hero.png", &window));
-	unsigned id = 0;
+	vector<Enemy>::iterator it = enemies.begin();
+	createEnemy(enemies, p);
 
-	for (int i = 0; i < HEIGHT_MAP; i++)
-		for (int j = 0; j < WIDTH_MAP; j++)
-		{
-			if (mapC[i][j] == '5'){
-				entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 1, id));
-				id++;
-			}
-			else if (mapC[i][j] == '6'){
-				entities.push_back(new Enemy(spriteSize * j, spriteSize * i, "images/Enemy.png", &p, 0, id));
-				id++;
-			}
-		}
-
-	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, entities, it, timeElapsed, restart);
+	mainCycle(window, scoreText, infoText, wastedText, wastedSprite, s_map, p, enemies, it, timeElapsed);
 
 	score = countScore(p, timeElapsed);
-
-	return restart;
 }
 
-void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wastedText, Sprite &wastedSprite, Sprite &s_map, Player &p, std::vector<Actor*> &entities, std::vector<Actor*>::iterator &it, double &timeElapsed, int &restart){ //Основной цикл игры
+string buildPath(unsigned lvl, unsigned map){
+	stringstream ss;
+	ss << "levels/level" << lvl
+		<< "/map" << map << ".txt";
+	return ss.str();
+}
+
+vector <sf::String> readMap(string path){
+	ifstream ifs(path);
+#ifdef Debug
+	cout << path << "\n";
+#endif
+	vector <sf::String> temp;
+	while (!ifs.eof()){
+		char str[25];
+		ifs >> str;
+		temp.push_back(str);
+	}
+	ifs.close();
+	return temp;
+}
+
+void restartGame(Player &p, vector<Enemy> &enemies){
+	enemies.clear();
+	p.resetActor();
+	p.totalMoney = MapProcessor().getCoinsLimit();
+	MapProcessor().proceedMap(mapC);
+	mapChanger(0);
+	createEnemy(enemies, p);
+}
+
+void mainCycle(RenderWindow &window,
+	Text &scoreText,
+	Text &infoText,
+	Text &wastedText,
+	Sprite &wastedSprite,
+	Sprite &s_map,
+	Player &p,
+	vector<Enemy> &enemies,
+	vector<Enemy>::iterator &it,
+	double &timeElapsed){ //Основной цикл игры
 
 	//Звук
 	SoundBuffer sb;
 	Sound sound;
 
-	//float currentFrame = 0;//хранит текущий кадр(Для анимации, пока нет) )
+	//Жизни
+	Texture heartsTexture;
+	heartsTexture.loadFromFile("images/Life.png");
+	Sprite heartsSprite;
+	heartsSprite.setTexture(heartsTexture);
+	heartsSprite.setTextureRect(IntRect(0, 0, 157, 48));
+
 	float time;
 	Clock clock;
 	float lastTime = 0;
@@ -96,17 +172,19 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 	//Счетчик времени в игре
 	double t0 = std::clock();
 	double t1;
-
-	float cc = 0; //Ограничитель анимации WASTED
-
-	restart = 0;
-	p.nextLvl = 0;
+	float cc = 0; //Ограничитель анимации смерти
 
 	while (window.isOpen())
 	{
-		if (Keyboard::isKeyPressed(Keyboard::Escape))  { restart = 0; window.close(); }
-		if (Keyboard::isKeyPressed(Keyboard::R)) { restart = 1; window.close(); }
-		if (p.nextLvl) { restart = 2; window.close(); }
+		if (Keyboard::isKeyPressed(Keyboard::Escape)) window.close();
+		if (Keyboard::isKeyPressed(Keyboard::R)){ restartGame(p, enemies); }
+		if (p.nextLvl) {
+			p.nextLvl = 0;
+			printLvlInfo(lvl, mapNum, timeElapsed, countScore(p, timeElapsed));
+			t0 = std::clock();
+			mapChanger(1);
+			restartGame(p, enemies);
+		}
 		time = clock.getElapsedTime().asMicroseconds();
 		time = time / 800;
 		sf::Event event;
@@ -117,12 +195,12 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		}
 
 		window.clear();
-		for (size_t i = 0; i < entities.size(); i++){
-			if (!entities[i]->life){
+		for (size_t i = 0; i < enemies.size(); i++){
+			if (!enemies[i].life){
 #ifdef Debug
 				printf("id %u is dead\n", entities[i]->id);
 #endif
-				if (entities[i]->killedByBullet) sb.loadFromFile("sounds/Headshot.wav");
+				if (enemies[i].killedByBullet) sb.loadFromFile("sounds/Headshot.wav");
 				else sb.loadFromFile("sounds/Death.wav");
 				sound.setBuffer(sb);
 				sound.play();
@@ -130,8 +208,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 				p.enemiesC++;
 				p.incScore(1000);
 				if (p.enemies == 0 && p.totalMoney == 0) p.done = 1;
-				delete [] entities[i];
-				it = entities.erase(entities.begin() + i);
+				it = enemies.erase(enemies.begin() + i);
 			}
 		}
 
@@ -152,29 +229,30 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 			}
 
 		float coordinatePlayerX, coordinatePlayerY = 0;
-		coordinatePlayerX = p.getRect().left;
-		coordinatePlayerY = p.getRect().top;
+		coordinatePlayerX = p.getFloatRect().left;
+		coordinatePlayerY = p.getFloatRect().top;
 
 		//Отображение HUD
-		getPlayerView(p.getRect().left + (p.getRect().width / 2), p.getRect().top + (p.getRect().height / 2));//Камера вида
+		getPlayerView(p.getFloatRect().left + (p.getFloatRect().width / 2.0f), p.getFloatRect().top + (p.getFloatRect().height / 2.0f));//Камера вида
+		heartsSprite.setPosition(view.getCenter().x + (spriteSize * 1.4) + (52 * (abs((int)p.lifeCount - 3))), view.getCenter().y - spriteSize * 4 + 12);
+		heartsSprite.setTextureRect(IntRect(0, 0, 52 * p.lifeCount, 48));
 		scoreText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y - spriteSize * 4 + 12);
 		infoText.setPosition(view.getCenter().x - spriteSize * 4 + 6, view.getCenter().y + spriteSize * 2 + 3);
 
 		//Update
 		viewmap(time);//функция скроллинга карты, передаем ей время sfml
-		p.cacheX = p.getRect().left;
-		p.cacheY = p.getRect().top;
-		for (unsigned i = 0; i < entities.size(); i++) entities[i]->update(time);
+		p.cacheX = p.getFloatRect().left;
+		p.cacheY = p.getFloatRect().top;
+		for (unsigned i = 0; i < enemies.size(); i++) enemies[i].update(time);
 		p.update(time);
 
 		window.setView(view);
 
 		//Draw
-		//window.draw(s_map);
 		window.draw(p.sprite);
-		for (unsigned i = 0; i < entities.size(); i++){
-			window.draw(entities[i]->sprite);
-			entities[i]->drawBars(time, window);
+		for (unsigned i = 0; i < enemies.size(); i++){
+			window.draw(enemies[i].sprite);
+			enemies[i].drawBars(time, window);
 		}
 		if (p.getHealth() <= 0) {
 			time = 0;
@@ -183,23 +261,28 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 				sb.loadFromFile("sounds/Enemy.wav");
 				sound.setBuffer(sb);
 				sound.play();
+				p.lifeCount--;
 			}
-			wastedSprite.setPosition(view.getCenter().x - windowSize / 2, view.getCenter().y - windowSize / 2);
+			wastedSprite.setPosition(view.getCenter().x - windowSize / 2.0f, view.getCenter().y - windowSize / 2.0f);
 			window.draw(wastedSprite);
-			wastedText.setPosition(view.getCenter().x - spriteSize*1.5, view.getCenter().y - spriteSize);
+			if (p.lifeCount == 0){
+				wastedText.setString("GAME OVER");
+				wastedText.setPosition(view.getCenter().x - spriteSize * 2.0f, view.getCenter().y - spriteSize);
+			}
+			wastedText.setPosition(view.getCenter().x - spriteSize * 1.5f, view.getCenter().y - spriteSize);
 			window.draw(wastedText);
-			view.setCenter(p.getRect().left + (p.getRect().width / 2), p.getRect().top + (p.getRect().height / 2));
+			view.setCenter(p.getFloatRect().left + (p.getFloatRect().width / 2.0f), p.getFloatRect().top + (p.getFloatRect().height / 2.0f));
 			view.rotate(0.125);
 			view.zoom(0.990f);
-			cc += 1;
+			cc++;
 		}
 
 		if (cc > 150) {
+			if (p.lifeCount == 0) window.close();
 			view.setRotation(0);
 			view.reset(sf::FloatRect(0, 0, windowSize, windowSize));
-
 			p.respawn();
-			entities[p.colId]->speed = 0.085;
+			enemies[p.colId].speed = 0.085f;
 			cc = 0;
 		}
 		viewmap(time);
@@ -211,6 +294,7 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 		ss << "Score: " << countScore(p, timeElapsed) << "\nFPS: " << (unsigned)(1.0f / time);
 		scoreText.setString(ss.str());
 		infoText.setString(p.getInfoString());
+		window.draw(heartsSprite);
 		window.draw(scoreText);
 		if (Keyboard::isKeyPressed(Keyboard::Tab)) window.draw(infoText);
 		window.display();
@@ -218,6 +302,6 @@ void mainCycle(RenderWindow &window, Text &scoreText, Text &infoText, Text &wast
 }
 
 int countScore(Player &p, double &timeElapsed){
-	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1)) / (((unsigned)timeElapsed / (p.enemiesC + 1)) * (p.dieCounter + 1));
+	if (timeElapsed != 0 && p.enemiesC != 0) return (p.score * (p.enemiesC + 1) * ((p.lifeCount + 1) / 2)) / (((unsigned)timeElapsed / (p.enemiesC + 1)) * (p.dieCounter + 1));
 	else return 0;
 }

@@ -16,8 +16,8 @@ void getPlayerView(float x, float y) { //функци¤ дл¤ считыван�
 
 
 void viewmap(float time) {
-	if (Keyboard::isKeyPressed(Keyboard::W)) view.move(0, -0.1*time);
-	if (Keyboard::isKeyPressed(Keyboard::A)) view.move(-0.1*time, 0);
-	if (Keyboard::isKeyPressed(Keyboard::S)) view.move(0, 0.1*time);
-	if (Keyboard::isKeyPressed(Keyboard::D)) view.move(0.1*time, 0);
+	if (Keyboard::isKeyPressed(Keyboard::W)) view.move(0.0f, -0.1f * time);
+	if (Keyboard::isKeyPressed(Keyboard::A)) view.move(-0.1f * time, 0.0f);
+	if (Keyboard::isKeyPressed(Keyboard::S)) view.move(0.0f, 0.1f * time);
+	if (Keyboard::isKeyPressed(Keyboard::D)) view.move(0.1f * time, 0.0f);
 }

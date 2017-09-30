@@ -40,12 +40,14 @@ public:
 
 	virtual void drawBars(float &time, RenderWindow &window){
 		HealthBar->setPercentage(getHealth());
-		HealthBar->setBarPos(getRect().left, getRect().top);
+		HealthBar->setBarPos(getFloatRect().left, getFloatRect().top);
 		HealthBar->update(time);
 		window.draw(HealthBar->getOverlay());
 		window.draw(HealthBar->getSprite());
 		window.draw(HealthBar->getBlackS());
 	}
+
+	virtual void resetActor(){}
 
 	void setHealth(float h){
 		if (h < 0){

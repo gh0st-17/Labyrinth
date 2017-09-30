@@ -7,15 +7,15 @@ using namespace std;
 
 class MapProcessor{
 private:
-	const unsigned coinsLimit = 50, heartsLimit = 2;
+	static const unsigned coinsLimit = 50, heartsLimit = 2;
 
-	void wipeLoot(vector<sf::String> &map){
+	static void wipeLoot(vector<sf::String> &map){
 		for (unsigned i = 1; i < 23; i++)
 			for (unsigned j = 1; j < 23; j++)
 				if (map[i][j] == '2' || map[i][j] == 'h') map[i][j] = '0';
 	}
 
-	unsigned countCoins(vector<sf::String> &map){
+	static unsigned countCoins(vector<sf::String> &map){
 		unsigned temp = 0;
 		for (unsigned i = 1; i < 23; i++)
 			for (unsigned j = 1; j < 23; j++)
@@ -26,7 +26,7 @@ private:
 		return temp;
 	}
 
-	unsigned countHearths(vector<sf::String> &map){
+	static unsigned countHearths(vector<sf::String> &map){
 		unsigned temp = 0;
 		for (unsigned i = 1; i < 23; i++)
 			for (unsigned j = 1; j < 23; j++)
@@ -37,7 +37,7 @@ private:
 		return temp;
 	}
 
-	void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount, vector<sf::String> &map){ //Генерация
+	static void randomMapGenerate(unsigned currentCoinsCount, unsigned currentHearthsCount, vector<sf::String> &map){ //Генерация
 		int randomElementX = 0;
 		int randomElementY = 0;
 		srand(time(0));
@@ -68,16 +68,18 @@ private:
 public:
 	MapProcessor(){}
 
-	unsigned getCoinsLimit(){ return coinsLimit; }
+	static unsigned getCoinsLimit(){ return coinsLimit; }
 
-	void proceedMap(int &restart, vector<sf::String> &map){
-		if (restart > 0) wipeLoot(map);
+	static void proceedMap(vector<sf::String> &map){
+		wipeLoot(map);
 		randomMapGenerate(countCoins(map), countHearths(map), map);
 	}
 };
 
 const int HEIGHT_MAP = 24;
 const int WIDTH_MAP = 24;
+
+unsigned lvl = 1, mapNum = 1; // It's temporary
 
 std::vector<sf::String> mapC;
 
